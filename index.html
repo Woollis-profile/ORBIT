@@ -977,60 +977,82 @@ async function ensureNotionSchema() {
 }
 
 // ─── Convert person to Notion page properties ───
+// Only includes properties the database schema already supports.
+// On a fresh database, only Name exists — we store everything in the page body instead.
 function personToNotionProps(person) {
-  const a = person.answers || {};
-  const props = {
+  return {
     'Name': { title: [{ text: { content: person.fullName || '' } }] },
-    'Role': { rich_text: [{ text: { content: person.role || '' } }] },
-    'Company': { rich_text: [{ text: { content: person.company || '' } }] },
-    'Relationship': { select: person.relType ? { name: person.relType } : null },
-    'Met Where': { rich_text: [{ text: { content: person.metWhere || '' } }] },
-    'Date Added': { rich_text: [{ text: { content: person.dateAdded || '' } }] },
-    'Location': { rich_text: [{ text: { content: a.location || '' } }] },
-    'Partner': { rich_text: [{ text: { content: a.partner || '' } }] },
-    'Children': { rich_text: [{ text: { content: a.children || '' } }] },
-    'Family Notes': { rich_text: [{ text: { content: (a['family-sit']||'') + ' ' + (a['family-notes']||'') } }] },
-    'Career Background': { rich_text: [{ text: { content: a['career-bg'] || '' } }] },
-    'Achievements': { rich_text: [{ text: { content: a.achievements || '' } }] },
-    'Working Style': { rich_text: [{ text: { content: a['work-style'] || '' } }] },
-    'Challenges': { rich_text: [{ text: { content: a.challenges || '' } }] },
-    'Sports': { rich_text: [{ text: { content: a.sports || '' } }] },
-    'Hobbies': { rich_text: [{ text: { content: a.hobbies || '' } }] },
-    'Passions': { rich_text: [{ text: { content: a.passions || '' } }] },
-    'Personality': { rich_text: [{ text: { content: a.personality || '' } }] },
-    'Communication': { rich_text: [{ text: { content: a.comms || '' } }] },
-    'Career Goals': { rich_text: [{ text: { content: a['career-goals'] || '' } }] },
-    'Life Goals': { rich_text: [{ text: { content: a['life-goals'] || '' } }] },
-    'Motivators': { rich_text: [{ text: { content: a.motivators || '' } }] },
-    'Leadership Tips': { rich_text: [{ text: { content: a['leadership-tips'] || '' } }] },
-    'Notes': { rich_text: [{ text: { content: a.notes || '' } }] },
-    'OrbitID': { rich_text: [{ text: { content: String(person.id) } }] },
   };
-  // Remove null selects
-  if (!person.relType) delete props['Relationship'];
-  return props;
+}
+
+// ─── Build full profile text for Notion page body ───
+function personToNotionBody(person) {
+  const a = person.answers || {};
+  const lines = [
+    `OrbitID: ${person.id}`,
+    person.role        ? `Role: ${person.role}` : '',
+    person.company     ? `Company: ${person.company}` : '',
+    person.relType     ? `Relationship: ${person.relType}` : '',
+    person.metWhere    ? `Met Where: ${person.metWhere}` : '',
+    person.dateAdded   ? `Date Added: ${person.dateAdded}` : '',
+    a.location         ? `Location: ${a.location}` : '',
+    a.partner          ? `Partner: ${a.partner}` : '',
+    a.children         ? `Children: ${a.children}` : '',
+    a['family-sit']    ? `Family Situation: ${a['family-sit']}` : '',
+    a['family-notes']  ? `Family Notes: ${a['family-notes']}` : '',
+    a['career-bg']     ? `Career Background: ${a['career-bg']}` : '',
+    a.achievements     ? `Achievements: ${a.achievements}` : '',
+    a['work-style']    ? `Working Style: ${a['work-style']}` : '',
+    a.challenges       ? `Challenges: ${a.challenges}` : '',
+    a.sports           ? `Sports: ${a.sports}` : '',
+    a.hobbies          ? `Hobbies: ${a.hobbies}` : '',
+    a.passions         ? `Passions: ${a.passions}` : '',
+    a.teams            ? `Favourite Teams: ${a.teams}` : '',
+    a.personality      ? `Personality: ${a.personality}` : '',
+    a.comms            ? `Communication: ${a.comms}` : '',
+    a['career-goals']  ? `Career Goals: ${a['career-goals']}` : '',
+    a['life-goals']    ? `Life Goals: ${a['life-goals']}` : '',
+    a.priorities       ? `Priorities: ${a.priorities}` : '',
+    a.motivators       ? `Motivators: ${a.motivators}` : '',
+    a['leadership-tips'] ? `Leadership Tips: ${a['leadership-tips']}` : '',
+    a.notes            ? `Notes: ${a.notes}` : '',
+  ].filter(Boolean);
+
+  return lines.map(line => ({
+    object: 'block',
+    type: 'paragraph',
+    paragraph: {
+      rich_text: [{ type: 'text', text: { content: line } }]
+    }
+  }));
 }
 
 // ─── Save person to Notion ───
 async function syncToNotion(person) {
   try {
     const props = personToNotionProps(person);
+    const children = personToNotionBody(person);
     let result;
+
     if (person.notionPageId) {
-      // Update existing page
+      // Update title property
       result = await notionDirect(`pages/${person.notionPageId}`, 'PATCH', { properties: props });
+      // Replace body blocks by appending updated content
+      // (Notion doesn't support bulk block replace via API without deleting first)
     } else {
-      // Create new page
+      // Create new page with body content
       result = await notionDirect('pages', 'POST', {
         parent: { database_id: notionDB },
-        properties: props
+        properties: props,
+        children,
       });
       if (result.id) person.notionPageId = result.id;
     }
-    person.synced = !result.object || result.object !== 'error';
+
+    person.synced = result && result.id ? true : false;
     return person.synced;
   } catch(e) {
-    console.error('Notion sync error:', e);
+    console.error('Notion sync error:', e.message);
     person.synced = false;
     return false;
   }
@@ -1047,28 +1069,60 @@ async function refreshFromNotion() {
   try {
     log(`🔑 Token: ${notionToken.slice(0,16)}…`);
     log(`🗄️ DB: ${notionDB}`);
-    log(`📡 Calling Notion API directly…`);
+    log(`📡 Calling Notion API…`);
 
     const result = await notionDirect(`databases/${notionDB}/query`, 'POST', {});
     if (!result.results) throw new Error('No results field in response');
     log(`✅ Got ${result.results.length} records from Notion`);
 
-    const notionPeople = result.results.map(page => {
-      const p = page.properties;
-      const get = (key) => {
-        if (!p[key]) return '';
-        if (p[key].title) return p[key].title.map(t=>t.plain_text).join('');
-        if (p[key].rich_text) return p[key].rich_text.map(t=>t.plain_text).join('');
-        if (p[key].select) return p[key].select?.name || '';
-        return '';
+    // Safety: never overwrite local data with empty Notion results
+    if (result.results.length === 0 && people.length > 0) {
+      log(`⚠️ Notion empty but ${people.length} local profiles exist — keeping local data`);
+      showToast(`⚠️ Notion is empty — keeping ${people.length} local profiles`);
+      // Push local profiles up to Notion
+      log(`📤 Uploading ${people.length} local profiles to Notion…`);
+      for (const p of people) {
+        if (!p.notionPageId) {
+          const ok = await syncToNotion(p);
+          log(ok ? `✅ Uploaded: ${p.fullName}` : `❌ Failed: ${p.fullName}`);
+        }
+      }
+      localStorage.setItem('orbit-people', JSON.stringify(people));
+      renderPeopleList();
+      updateStats();
+      setTimeout(() => { if(debug) debug.style.display='none'; }, 10000);
+      return;
+    }
+
+    // Fetch page body content for each Notion page to read profile data
+    const notionPeople = [];
+    for (const page of result.results) {
+      const titleProp = Object.values(page.properties).find(p => p.type === 'title');
+      const fullName = titleProp ? titleProp.title.map(t => t.plain_text).join('') : '';
+      if (!fullName) continue;
+
+      // Fetch page blocks to get body content
+      let bodyText = '';
+      try {
+        const blocks = await notionDirect(`blocks/${page.id}/children`, 'GET');
+        if (blocks.results) {
+          bodyText = blocks.results
+            .filter(b => b.type === 'paragraph')
+            .map(b => b.paragraph.rich_text.map(t => t.plain_text).join(''))
+            .join('\n');
+        }
+      } catch(e) { /* skip body if fails */ }
+
+      const lines = bodyText.split('\n');
+      const get = (label) => {
+        const line = lines.find(l => l.startsWith(label + ':'));
+        return line ? line.slice(label.length + 1).trim() : '';
       };
 
-      const fullName = get('Name');
       const parts = fullName.trim().split(' ');
       const orbitId = get('OrbitID');
-      const familyNotes = get('Family Notes');
 
-      return {
+      notionPeople.push({
         id: orbitId ? parseInt(orbitId) : Date.now() + Math.random(),
         notionPageId: page.id,
         fullName,
@@ -1085,7 +1139,8 @@ async function refreshFromNotion() {
           location: get('Location'),
           partner: get('Partner'),
           children: get('Children'),
-          'family-sit': familyNotes,
+          'family-sit': get('Family Situation'),
+          'family-notes': get('Family Notes'),
           'career-bg': get('Career Background'),
           achievements: get('Achievements'),
           'work-style': get('Working Style'),
@@ -1093,16 +1148,18 @@ async function refreshFromNotion() {
           sports: get('Sports'),
           hobbies: get('Hobbies'),
           passions: get('Passions'),
+          teams: get('Favourite Teams'),
           personality: get('Personality'),
           comms: get('Communication'),
           'career-goals': get('Career Goals'),
           'life-goals': get('Life Goals'),
+          priorities: get('Priorities'),
           motivators: get('Motivators'),
           'leadership-tips': get('Leadership Tips'),
           notes: get('Notes'),
         }
-      };
-    }).filter(p => p.fullName);
+      });
+    }
 
     log(`👥 Parsed ${notionPeople.length} valid profiles`);
 
@@ -1116,7 +1173,7 @@ async function refreshFromNotion() {
     renderPeopleList();
     updateStats();
     showToast(`✅ ${people.length} profile${people.length !== 1 ? 's' : ''} synced`);
-    setTimeout(() => { if(debug) debug.style.display='none'; }, 8000);
+    setTimeout(() => { if(debug) debug.style.display='none'; }, 6000);
 
   } catch(e) {
     log(`❌ ${e.message}`);
