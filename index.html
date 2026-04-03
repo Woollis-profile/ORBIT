@@ -905,6 +905,7 @@ function init() {
   if (notionToken && notionDB) {
     show('home');
     renderPeopleList();
+    updateStats();
     refreshFromNotion();
   } else {
     show('setup');
@@ -941,11 +942,16 @@ async function saveSetup() {
 }
 
 // ═══════════════════════════════════════════════
-// NOTION API — routed via CORS proxy
+// NOTION API — with proxy fallback chain
 // ═══════════════════════════════════════════════
-const NOTION_PROXY = 'https://corsproxy.io/?url=https://api.notion.com/v1/';
+const PROXIES = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://proxy.cors.sh/${url}`,
+];
 
 async function notionDirect(endpoint, method='GET', body=null) {
+  const target = `https://api.notion.com/v1/${endpoint}`;
   const opts = {
     method,
     headers: {
@@ -955,15 +961,27 @@ async function notionDirect(endpoint, method='GET', body=null) {
     }
   };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(NOTION_PROXY + endpoint, opts);
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Notion API error ${res.status}: ${err}`);
+
+  // Try each proxy in turn until one works
+  let lastError;
+  for (const makeProxy of PROXIES) {
+    try {
+      const res = await fetch(makeProxy(target), opts);
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`HTTP ${res.status}: ${txt.slice(0, 200)}`);
+      }
+      const data = await res.json();
+      if (data.object === 'error') throw new Error(data.message);
+      return data;
+    } catch(e) {
+      lastError = e;
+      console.warn('Proxy failed, trying next:', e.message);
+    }
   }
-  return res.json();
+  throw lastError;
 }
 
-// Alias so all existing calls work
 const notionRequest = notionDirect;
 
 async function ensureNotionSchema() {
@@ -1040,7 +1058,7 @@ async function refreshFromNotion() {
     const result = await notionDirect(`databases/${notionDB}/query`, 'POST', {
       sorts: [{ property: 'Date Added', direction: 'descending' }]
     });
-    if (!result.results) return;
+    if (!result.results) throw new Error('No results returned');
 
     const notionPeople = result.results.map(page => {
       const p = page.properties;
@@ -1058,7 +1076,7 @@ async function refreshFromNotion() {
       const familyNotes = get('Family Notes');
 
       return {
-        id: orbitId ? parseInt(orbitId) : page.id,
+        id: orbitId ? parseInt(orbitId) : Date.now() + Math.random(),
         notionPageId: page.id,
         fullName,
         firstName: parts[0] || '',
@@ -1093,19 +1111,22 @@ async function refreshFromNotion() {
       };
     }).filter(p => p.fullName);
 
-    // Merge: preserve local photos, merge with Notion data
+    // Preserve local photos
     const localPhotos = {};
-    people.forEach(p => { if(p.photo) localPhotos[p.fullName] = p.photo; });
+    people.forEach(p => { if (p.photo) localPhotos[p.fullName] = p.photo; });
     people = notionPeople;
-    people.forEach(p => { if(localPhotos[p.fullName]) p.photo = localPhotos[p.fullName]; });
+    people.forEach(p => { if (localPhotos[p.fullName]) p.photo = localPhotos[p.fullName]; });
 
     localStorage.setItem('orbit-people', JSON.stringify(people));
     renderPeopleList();
     updateStats();
-    showToast(`✅ ${people.length} profiles synced`);
+    showToast(`✅ ${people.length} profile${people.length !== 1 ? 's' : ''} synced`);
   } catch(e) {
     console.error('Refresh error:', e);
-    showToast('⚠️ Sync failed — check connection');
+    // Still show local data with correct stats even if sync fails
+    renderPeopleList();
+    updateStats();
+    showToast('⚠️ Showing local data — Notion sync failed');
   }
 }
 
