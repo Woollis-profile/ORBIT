@@ -16,9 +16,9 @@
 
 :root {
   --bg: #0a0c12;
-  --surface: #13161f;
-  --surface2: #1a1e2a;
-  --surface3: #222736;
+  --surface: rgba(19,22,31,0.82);
+  --surface2: rgba(26,30,42,0.88);
+  --surface3: rgba(34,39,54,0.92);
   --border: rgba(255,255,255,0.07);
   --border2: rgba(255,255,255,0.12);
   --accent: #c8a96e;
@@ -40,7 +40,7 @@ html { background:#0a0c12 !important; color-scheme:dark; }
 
 body {
   font-family: var(--sans);
-  background: #0a0c12 !important;
+  background: transparent !important;
   color: var(--text);
   min-height: 100vh;
   max-width: 430px;
@@ -50,7 +50,7 @@ body {
 }
 
 /* ── SCREENS ── */
-.screen { display:none; min-height:100vh; flex-direction:column; animation: fadeIn 0.25s ease; }
+.screen { display:none; min-height:100vh; flex-direction:column; animation: fadeIn 0.25s ease; position:relative; z-index:1; }
 .screen.active { display:flex; }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
@@ -853,6 +853,12 @@ body {
     </div>
   </div>
 </div>
+
+<!-- ═══════════ BACKGROUND CANVAS ═══════════ -->
+<canvas id="bg-canvas" style="
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  z-index:0; pointer-events:none;
+"></canvas>
 
 <!-- ═══════════ TOAST ═══════════ -->
 <div class="toast" id="toast"></div>
@@ -1697,6 +1703,222 @@ function generateAppIcon() {
   ctx.fillText('O',size/2,size/2+2);
   document.getElementById('apple-touch-icon-link').setAttribute('href', c.toDataURL('image/png'));
 }
+
+// ═══════════════════════════════════════════════
+// BACKGROUND — MILKY WAY + GOLD CIRCUIT BOARD
+// ═══════════════════════════════════════════════
+(function initBackground() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, animFrame;
+
+  // ── Stars ──
+  let stars = [];
+  function makeStars(n) {
+    stars = [];
+    for (let i = 0; i < n; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.4,
+        a: Math.random(),
+        speed: 0.002 + Math.random() * 0.006,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+  // ── Circuit nodes ──
+  let nodes = [];
+  function makeNodes(n) {
+    nodes = [];
+    const cols = 6, rows = 10;
+    const cw = W / cols, ch = H / rows;
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rows; r++) {
+        if (Math.random() < 0.55) {
+          nodes.push({
+            x: cw * c + cw * 0.2 + Math.random() * cw * 0.6,
+            y: ch * r + ch * 0.2 + Math.random() * ch * 0.6,
+            pulse: Math.random() * Math.PI * 2,
+            pulseSpeed: 0.015 + Math.random() * 0.025,
+            active: Math.random() < 0.4,
+          });
+        }
+      }
+    }
+  }
+
+  // ── Traces between nearby nodes ──
+  let traces = [];
+  function makeTraces() {
+    traces = [];
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[j].x - nodes[i].x;
+        const dy = nodes[j].y - nodes[i].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 140 && Math.random() < 0.38) {
+          // Make Manhattan-style L-shaped traces
+          const mid = Math.random() < 0.5
+            ? { x: nodes[j].x, y: nodes[i].y }
+            : { x: nodes[i].x, y: nodes[j].y };
+          traces.push({
+            a: nodes[i], b: nodes[j], mid,
+            flow: Math.random() * Math.PI * 2,
+            flowSpeed: 0.018 + Math.random() * 0.03,
+            active: nodes[i].active || nodes[j].active,
+          });
+        }
+      }
+    }
+  }
+
+  function resize() {
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+    makeStars(320);
+    makeNodes(70);
+    makeTraces();
+  }
+
+  function drawMilkyWay(t) {
+    // Deep space base
+    ctx.fillStyle = '#080a10';
+    ctx.fillRect(0, 0, W, H);
+
+    // Milky way nebula glow — diagonal band
+    const angle = 0.4;
+    const cx = W * 0.5, cy = H * 0.45;
+
+    const g1 = ctx.createRadialGradient(cx - 60, cy - 80, 0, cx - 60, cy - 80, H * 0.65);
+    g1.addColorStop(0, 'rgba(60,40,120,0.18)');
+    g1.addColorStop(0.4, 'rgba(30,20,70,0.10)');
+    g1.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
+
+    const g2 = ctx.createRadialGradient(cx + 80, cy + 60, 0, cx + 80, cy + 60, H * 0.5);
+    g2.addColorStop(0, 'rgba(40,20,90,0.14)');
+    g2.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
+
+    // Blue-teal accent cloud
+    const g3 = ctx.createRadialGradient(W * 0.8, H * 0.2, 0, W * 0.8, H * 0.2, H * 0.35);
+    g3.addColorStop(0, 'rgba(20,50,80,0.12)');
+    g3.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g3; ctx.fillRect(0, 0, W, H);
+
+    // Amber cloud near bottom
+    const g4 = ctx.createRadialGradient(W * 0.2, H * 0.85, 0, W * 0.2, H * 0.85, H * 0.3);
+    g4.addColorStop(0, 'rgba(80,50,10,0.10)');
+    g4.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g4; ctx.fillRect(0, 0, W, H);
+  }
+
+  function drawStars(t) {
+    stars.forEach(s => {
+      const alpha = 0.3 + 0.5 * Math.abs(Math.sin(t * s.speed + s.phase));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,248,230,${alpha * s.a})`;
+      ctx.fill();
+    });
+  }
+
+  function drawCircuit(t) {
+    // Update pulses
+    nodes.forEach(n => { n.pulse += n.pulseSpeed; });
+    traces.forEach(tr => { tr.flow += tr.flowSpeed; });
+
+    // Draw traces
+    traces.forEach(tr => {
+      const baseAlpha = tr.active ? 0.22 : 0.09;
+      const glow = tr.active ? 0.5 + 0.5 * Math.sin(tr.flow) : 0.15;
+
+      // Trace line (L-shaped)
+      ctx.beginPath();
+      ctx.moveTo(tr.a.x, tr.a.y);
+      ctx.lineTo(tr.mid.x, tr.mid.y);
+      ctx.lineTo(tr.b.x, tr.b.y);
+      ctx.strokeStyle = `rgba(200,169,110,${baseAlpha})`;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+
+      // Animated energy pulse travelling along trace
+      if (tr.active) {
+        const progress = (Math.sin(tr.flow) + 1) / 2;
+        // Interpolate along the two segments
+        let px, py;
+        const total = Math.abs(tr.mid.x - tr.a.x) + Math.abs(tr.mid.y - tr.a.y)
+                    + Math.abs(tr.b.x - tr.mid.x) + Math.abs(tr.b.y - tr.mid.y);
+        const seg1 = (Math.abs(tr.mid.x - tr.a.x) + Math.abs(tr.mid.y - tr.a.y)) / total;
+        if (progress < seg1) {
+          const t2 = progress / seg1;
+          px = tr.a.x + (tr.mid.x - tr.a.x) * t2;
+          py = tr.a.y + (tr.mid.y - tr.a.y) * t2;
+        } else {
+          const t2 = (progress - seg1) / (1 - seg1);
+          px = tr.mid.x + (tr.b.x - tr.mid.x) * t2;
+          py = tr.mid.y + (tr.b.y - tr.mid.y) * t2;
+        }
+
+        // Glowing dot
+        const pg = ctx.createRadialGradient(px, py, 0, px, py, 5);
+        pg.addColorStop(0, 'rgba(232,201,142,0.9)');
+        pg.addColorStop(0.4, 'rgba(200,169,110,0.4)');
+        pg.addColorStop(1, 'rgba(200,169,110,0)');
+        ctx.beginPath();
+        ctx.arc(px, py, 5, 0, Math.PI * 2);
+        ctx.fillStyle = pg;
+        ctx.fill();
+      }
+    });
+
+    // Draw nodes
+    nodes.forEach(n => {
+      const pulse = 0.5 + 0.5 * Math.sin(n.pulse);
+      const size = n.active ? 3.5 + pulse * 1.5 : 2;
+      const alpha = n.active ? 0.6 + pulse * 0.4 : 0.2 + pulse * 0.15;
+
+      if (n.active) {
+        // Outer glow
+        const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, size * 4);
+        grd.addColorStop(0, `rgba(232,201,142,${alpha * 0.6})`);
+        grd.addColorStop(1, 'rgba(200,169,110,0)');
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, size * 4, 0, Math.PI * 2);
+        ctx.fillStyle = grd;
+        ctx.fill();
+      }
+
+      // Node dot
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(232,201,142,${alpha})`;
+      ctx.fill();
+
+      // Small square chip on active nodes
+      if (n.active && pulse > 0.7) {
+        ctx.strokeStyle = `rgba(200,169,110,${(pulse - 0.7) * 0.8})`;
+        ctx.lineWidth = 0.6;
+        ctx.strokeRect(n.x - 5, n.y - 5, 10, 10);
+      }
+    });
+  }
+
+  let t = 0;
+  function draw() {
+    t += 0.016;
+    drawMilkyWay(t);
+    drawStars(t);
+    drawCircuit(t);
+    animFrame = requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); });
+  resize();
+  draw();
+})();
 
 // ═══════════════════════════════════════════════
 // START
