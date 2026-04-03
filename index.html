@@ -943,26 +943,22 @@ async function saveSetup() {
 }
 
 // ═══════════════════════════════════════════════
-// NOTION API — direct call (Notion supports CORS)
+// NOTION API — via personal Cloudflare proxy
 // ═══════════════════════════════════════════════
+const PROXY = 'https://orbit-notion-proxy.gmharvey.workers.dev/notion/';
+
 async function notionDirect(endpoint, method='GET', body=null) {
-  const target = `https://api.notion.com/v1/${endpoint}`;
   const headers = {
     'Authorization': `Bearer ${notionToken}`,
     'Notion-Version': '2022-06-28',
+    'Content-Type': 'application/json',
   };
-  // Only set Content-Type on requests with a body — avoids preflight on GETs
-  if (body) headers['Content-Type'] = 'application/json';
-
   const opts = { method, headers };
   if (body) opts.body = JSON.stringify(body);
 
-  const res = await fetch(target, opts);
+  const res = await fetch(PROXY + endpoint, opts);
   const data = await res.json();
-
-  if (data.object === 'error') {
-    throw new Error(`Notion: ${data.message} (${data.code})`);
-  }
+  if (data.object === 'error') throw new Error(`Notion: ${data.message} (${data.code})`);
   return data;
 }
 
