@@ -580,6 +580,7 @@ body {
         <div class="home-stat-label">Refresh</div>
       </div>
     </div>
+    <div id="debug-bar" style="display:none;margin-top:10px;background:rgba(255,255,255,0.05);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;word-break:break-all;"></div>
   </div>
 
   <div class="search-bar">
@@ -942,44 +943,27 @@ async function saveSetup() {
 }
 
 // ═══════════════════════════════════════════════
-// NOTION API — with proxy fallback chain
+// NOTION API — direct call (Notion supports CORS)
 // ═══════════════════════════════════════════════
-const PROXIES = [
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-  url => `https://proxy.cors.sh/${url}`,
-];
-
 async function notionDirect(endpoint, method='GET', body=null) {
   const target = `https://api.notion.com/v1/${endpoint}`;
-  const opts = {
-    method,
-    headers: {
-      'Authorization': `Bearer ${notionToken}`,
-      'Notion-Version': '2022-06-28',
-      'Content-Type': 'application/json',
-    }
+  const headers = {
+    'Authorization': `Bearer ${notionToken}`,
+    'Notion-Version': '2022-06-28',
   };
+  // Only set Content-Type on requests with a body — avoids preflight on GETs
+  if (body) headers['Content-Type'] = 'application/json';
+
+  const opts = { method, headers };
   if (body) opts.body = JSON.stringify(body);
 
-  // Try each proxy in turn until one works
-  let lastError;
-  for (const makeProxy of PROXIES) {
-    try {
-      const res = await fetch(makeProxy(target), opts);
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`HTTP ${res.status}: ${txt.slice(0, 200)}`);
-      }
-      const data = await res.json();
-      if (data.object === 'error') throw new Error(data.message);
-      return data;
-    } catch(e) {
-      lastError = e;
-      console.warn('Proxy failed, trying next:', e.message);
-    }
+  const res = await fetch(target, opts);
+  const data = await res.json();
+
+  if (data.object === 'error') {
+    throw new Error(`Notion: ${data.message} (${data.code})`);
   }
-  throw lastError;
+  return data;
 }
 
 const notionRequest = notionDirect;
@@ -1054,11 +1038,20 @@ async function syncToNotion(person) {
 async function refreshFromNotion() {
   if (!notionToken || !notionDB) return;
   showToast('↻ Syncing from Notion…');
+  const debug = document.getElementById('debug-bar');
+  const log = (msg) => { if(debug){ debug.style.display='block'; debug.innerHTML += msg + '<br>'; } console.log(msg); };
+  if(debug) debug.innerHTML = '';
+
   try {
+    log(`🔑 Token: ${notionToken.slice(0,16)}…`);
+    log(`🗄️ DB: ${notionDB}`);
+    log(`📡 Calling Notion API directly…`);
+
     const result = await notionDirect(`databases/${notionDB}/query`, 'POST', {
       sorts: [{ property: 'Date Added', direction: 'descending' }]
     });
-    if (!result.results) throw new Error('No results returned');
+    if (!result.results) throw new Error('No results field in response');
+    log(`✅ Got ${result.results.length} records from Notion`);
 
     const notionPeople = result.results.map(page => {
       const p = page.properties;
@@ -1111,6 +1104,8 @@ async function refreshFromNotion() {
       };
     }).filter(p => p.fullName);
 
+    log(`👥 Parsed ${notionPeople.length} valid profiles`);
+
     // Preserve local photos
     const localPhotos = {};
     people.forEach(p => { if (p.photo) localPhotos[p.fullName] = p.photo; });
@@ -1121,12 +1116,14 @@ async function refreshFromNotion() {
     renderPeopleList();
     updateStats();
     showToast(`✅ ${people.length} profile${people.length !== 1 ? 's' : ''} synced`);
+    setTimeout(() => { if(debug) debug.style.display='none'; }, 8000);
+
   } catch(e) {
+    log(`❌ ${e.message}`);
     console.error('Refresh error:', e);
-    // Still show local data with correct stats even if sync fails
     renderPeopleList();
     updateStats();
-    showToast('⚠️ Showing local data — Notion sync failed');
+    showToast('⚠️ ' + (e.message || 'Notion sync failed'));
   }
 }
 
