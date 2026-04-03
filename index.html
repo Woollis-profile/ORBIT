@@ -1478,12 +1478,13 @@ Rules:
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }]
       })
     });
     const data = await response.json();
+    if (data.error) throw new Error(data.error.message || 'API error');
     const text = data.content?.find(b=>b.type==='text')?.text || '[]';
     const clean = text.replace(/```json|```/g,'').trim();
     const qs = JSON.parse(clean);
@@ -1503,7 +1504,7 @@ Rules:
       chipsDiv.appendChild(chip);
     });
   } catch(e) {
-    chipsDiv.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">Could not generate questions — tap Refresh to try again.</div>';
+    chipsDiv.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:8px 0;">⚠️ ${e.message || 'Could not generate questions'} — tap Refresh to try again.</div>`;
   }
 }
 
@@ -1538,7 +1539,7 @@ async function callClaudeAI(userMessage) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5',
       max_tokens: 1000,
       system: buildSystemPrompt(),
       messages
@@ -1546,7 +1547,14 @@ async function callClaudeAI(userMessage) {
   });
 
   const data = await response.json();
-  const reply = data.content?.find(b=>b.type==='text')?.text || 'Sorry, I couldn\'t generate a response.';
+
+  // Surface any API error clearly
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  if (data.type === 'error') throw new Error(data.error?.message || 'API error');
+
+  const reply = data.content?.find(b => b.type === 'text')?.text;
+  if (!reply) throw new Error('Empty response from AI');
+
   aiChatHistory = [...messages, { role: 'assistant', content: reply }];
   return reply;
 }
@@ -1592,7 +1600,7 @@ async function sendAIMessage() {
     addChatBubble(reply, 'ai');
   } catch(e) {
     removeTypingIndicator();
-    addChatBubble('Something went wrong — please try again.', 'ai');
+    addChatBubble(`⚠️ ${e.message || 'Something went wrong — please try again.'}`, 'ai');
   }
 }
 
@@ -1603,7 +1611,6 @@ async function sendQuickPrompt(prompt) {
   const chat = document.getElementById('ai-chat');
   chat.scrollTop = chat.scrollHeight;
 
-  // Scroll to chat
   setTimeout(() => {
     document.querySelector('.ai-chat').scrollIntoView({ behavior:'smooth' });
   }, 100);
@@ -1614,7 +1621,7 @@ async function sendQuickPrompt(prompt) {
     addChatBubble(reply, 'ai');
   } catch(e) {
     removeTypingIndicator();
-    addChatBubble('Something went wrong — please try again.', 'ai');
+    addChatBubble(`⚠️ ${e.message || 'Something went wrong — please try again.'}`, 'ai');
   }
 }
 
