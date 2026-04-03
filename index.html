@@ -1043,9 +1043,7 @@ async function refreshFromNotion() {
     log(`🗄️ DB: ${notionDB}`);
     log(`📡 Calling Notion API directly…`);
 
-    const result = await notionDirect(`databases/${notionDB}/query`, 'POST', {
-      sorts: [{ property: 'Date Added', direction: 'descending' }]
-    });
+    const result = await notionDirect(`databases/${notionDB}/query`, 'POST', {});
     if (!result.results) throw new Error('No results field in response');
     log(`✅ Got ${result.results.length} records from Notion`);
 
