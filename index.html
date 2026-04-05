@@ -698,7 +698,7 @@ body.light-mode .home-header { background:linear-gradient(180deg,#e8e3da 0%,#f0e
   <div class="nav-bar">
     <button class="nav-back" onclick="goHome()">←</button>
     <span class="nav-title">New Contact</span>
-    <button class="nav-action" onclick="startInterview()">Begin →</button>
+    <button class="nav-action" onclick="startInterview()" id="begin-btn">Begin →</button>
   </div>
   <div class="scroll-body" style="padding-bottom:40px;">
     <div style="text-align:center;padding:20px 0 6px;">
@@ -1568,9 +1568,13 @@ function goHome() { show('home'); renderPeopleList(); updateStats(); renderUpcom
 
 function startAddPerson() {
   currentPerson = {};
+  currentPersonIndex = -1;  // ensure not in edit mode
   selectedRelType = [];
   photoDataUrl = '';
   selectedPersonality = [];
+  // Reset button label to new-contact mode
+  const beginBtn = document.getElementById('begin-btn');
+  if (beginBtn) beginBtn.textContent = 'Begin →';
   ['first-name','last-name','role-input','company-input','met-where',
    'contact-mobile','contact-email','contact-address','contact-birthday',
    'contact-work-anniversary','contact-other-anniversary',
@@ -1588,31 +1592,65 @@ function startInterview() {
   const last = document.getElementById('last-name').value.trim();
   if (!first) { showToast('⚠️ Please enter a first name'); return; }
   const gv = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-  currentPerson = {
-    id: Date.now(),
-    firstName: first, lastName: last,
-    fullName: (first+' '+last).trim(),
-    role: gv('role-input'),
-    company: gv('company-input'),
-    relType: selectedRelType.join(', '),
-    metWhere: gv('met-where'),
-    photo: photoDataUrl,
-    dateAdded: new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}),
-    synced: false, answers: {},
-    contact: {
-      mobile:           gv('contact-mobile'),
-      email:            gv('contact-email'),
-      address:          gv('contact-address'),
-      birthday:         gv('contact-birthday'),
-      workAnniversary:  gv('contact-work-anniversary'),
-      otherAnniversary: gv('contact-other-anniversary'),
-      linkedin:         gv('contact-linkedin'),
-      instagram:        gv('contact-instagram'),
-      twitter:          gv('contact-twitter'),
-      facebook:         gv('contact-facebook'),
-      socialOther:      gv('contact-social-other'),
-    }
+
+  const isEditing = currentPersonIndex >= 0;
+
+  // Build the contact object — merge over existing if editing
+  const existingContact = (isEditing && currentPerson.contact) ? currentPerson.contact : {};
+  const contactFields = {
+    mobile:           gv('contact-mobile'),
+    email:            gv('contact-email'),
+    address:          gv('contact-address'),
+    birthday:         gv('contact-birthday'),
+    workAnniversary:  gv('contact-work-anniversary'),
+    otherAnniversary: gv('contact-other-anniversary'),
+    linkedin:         gv('contact-linkedin'),
+    instagram:        gv('contact-instagram'),
+    twitter:          gv('contact-twitter'),
+    facebook:         gv('contact-facebook'),
+    socialOther:      gv('contact-social-other'),
   };
+  // Only overwrite existing value if the new field is non-empty
+  const mergedContact = {};
+  Object.keys({...existingContact, ...contactFields}).forEach(k => {
+    mergedContact[k] = contactFields[k] || existingContact[k] || '';
+  });
+
+  if (isEditing) {
+    // EDITING: preserve existing id, dateAdded, answers, meetings, dates, reminders
+    currentPerson = {
+      ...currentPerson,
+      firstName: first,
+      lastName:  last,
+      fullName:  (first + ' ' + last).trim(),
+      role:      gv('role-input'),
+      company:   gv('company-input'),
+      relType:   selectedRelType.join(', '),
+      metWhere:  gv('met-where'),
+      photo:     photoDataUrl || currentPerson.photo,
+      synced:    false,
+      contact:   mergedContact,
+      // answers preserved from existing currentPerson — NOT reset
+    };
+  } else {
+    // NEW PERSON: fresh object
+    currentPerson = {
+      id:        Date.now(),
+      firstName: first,
+      lastName:  last,
+      fullName:  (first + ' ' + last).trim(),
+      role:      gv('role-input'),
+      company:   gv('company-input'),
+      relType:   selectedRelType.join(', '),
+      metWhere:  gv('met-where'),
+      photo:     photoDataUrl,
+      dateAdded: new Date().toLocaleDateString('en-AU', {day:'numeric', month:'short', year:'numeric'}),
+      synced:    false,
+      answers:   {},
+      contact:   mergedContact,
+    };
+  }
+
   currentQ = 0;
   show('interview');
   renderQuestion();
@@ -1678,28 +1716,44 @@ function saveCurrentAnswer() {
   if (q.type === 'multi' && selectedPersonality.length) {
     val = [...selectedPersonality, ...(val ? [val] : [])].join(',');
   }
+  // Only overwrite if user entered something — preserves existing on skip
   if (val) currentPerson.answers[q.key] = val;
 }
 
 function nextQuestion() { saveCurrentAnswer(); currentQ++; if(currentQ>=questions.length) finishInterview(); else renderQuestion(); }
-function skipQuestion() { currentQ++; if(currentQ>=questions.length) finishInterview(); else renderQuestion(); }
+function skipQuestion()  { currentQ++; if(currentQ>=questions.length) finishInterview(); else renderQuestion(); }
 
 async function finishInterview() {
+  const wasEditing = currentPersonIndex >= 0;
+
   if (currentPersonIndex >= 0) people[currentPersonIndex] = currentPerson;
   else people.unshift(currentPerson);
   localStorage.setItem('orbit-people', JSON.stringify(people));
   currentPersonIndex = -1;
 
-  const filled = Object.keys(currentPerson.answers).length;
-  document.getElementById('complete-sub').innerHTML = `<strong>${currentPerson.firstName}</strong>'s profile captured with ${filled} data points.`;
-  document.getElementById('sync-icon').textContent = '⏳';
-  document.getElementById('sync-text').textContent = 'Syncing to Notion…';
-  show('complete');
+  if (wasEditing) {
+    // Editing: save quietly and return to profile — no completion screen
+    showToast('⏳ Saving…');
+    const ok = await syncToNotion(currentPerson);
+    localStorage.setItem('orbit-people', JSON.stringify(people));
+    showToast(ok ? '✅ Profile updated and synced' : '⚠️ Saved locally');
+    loadProfile(currentPerson);
+    show('profile');
+  } else {
+    // New person: show the completion screen
+    const filled = Object.keys(currentPerson.answers).length;
+    document.getElementById('complete-sub').innerHTML = `<strong>${currentPerson.firstName}</strong>'s profile captured with ${filled} data points.`;
+    document.getElementById('sync-icon').textContent = '⏳';
+    document.getElementById('sync-text').textContent = 'Syncing to Notion…';
+    show('complete');
 
-  const ok = await syncToNotion(currentPerson);
-  localStorage.setItem('orbit-people', JSON.stringify(people));
-  document.getElementById('sync-icon').textContent = ok ? '✅' : '⚠️';
-  document.getElementById('sync-text').textContent = ok ? 'Synced to Notion — available on all devices' : 'Saved locally — will retry when online';
+    const ok = await syncToNotion(currentPerson);
+    localStorage.setItem('orbit-people', JSON.stringify(people));
+    document.getElementById('sync-icon').textContent = ok ? '✅' : '⚠️';
+    document.getElementById('sync-text').textContent = ok
+      ? 'Synced to Notion — available on all devices'
+      : 'Saved locally — will retry when online';
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1885,6 +1939,10 @@ function editProfile() {
   document.querySelectorAll('#rel-type-opts .qopt').forEach(b => {
     b.classList.toggle('selected', selectedRelType.includes(b.textContent.trim()));
   });
+
+  // Update labels to reflect edit mode
+  const beginBtn = document.getElementById('begin-btn');
+  if (beginBtn) beginBtn.textContent = 'Update →';
 
   show('add-person');
 }
