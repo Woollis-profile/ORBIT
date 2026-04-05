@@ -1844,10 +1844,14 @@ function openSocial(platform) {
 }
 
 function switchTab(name, el) {
-  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  if(el) el.classList.add('active');
-  document.getElementById('tab-'+name)?.classList.add('active');
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.style.display = '';        // clear any inline style so CSS class works
+    p.classList.remove('active');
+  });
+  if (el) el.classList.add('active');
+  const panel = document.getElementById('tab-' + name);
+  if (panel) { panel.style.display = ''; panel.classList.add('active'); }
 }
 
 function editProfile() {
@@ -2316,8 +2320,11 @@ function searchProfile(query) {
   const content = document.querySelector('.profile-content');
   if (!content) return;
 
-  // Show all tabs to search across them
-  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'block');
+  // Show all tabs during search using CSS class (not inline style)
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.style.display = '';       // clear any inline style
+    p.classList.add('active');  // make visible via CSS class
+  });
   document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
 
   // Highlight matches in info-row-value elements
@@ -2343,8 +2350,11 @@ function clearProfileSearch() {
     if (el.dataset.orig) { el.textContent = el.dataset.orig; delete el.dataset.orig; }
   });
 
-  // Restore normal tab view
-  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  // Remove any inline display styles set during search, then restore via CSS class
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.style.display = '';  // clear inline style so CSS class takes over
+    p.classList.remove('active');
+  });
   switchTab('overview', document.querySelector('.ptab'));
 }
 
