@@ -255,8 +255,10 @@ body {
   background:var(--surface2); border:1px solid var(--border);
   color:var(--text); border-radius:10px; padding:7px 13px;
   font-size:12px; cursor:pointer; transition:all 0.15s; font-family:var(--sans);
+  position:relative;
 }
 .qopt:active, .qopt.selected { background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+.qopt.selected::after { content:'✓'; margin-left:5px; font-size:10px; font-weight:700; }
 
 /* ── INTERVIEW ── */
 #interview { background:var(--bg); }
@@ -505,6 +507,67 @@ body {
 }
 .toast.show { opacity:1; }
 
+/* ── LIGHT MODE ── */
+body.light-mode {
+  --bg:#f0ede8; --surface:rgba(255,255,255,0.92); --surface2:rgba(240,236,230,0.96);
+  --surface3:rgba(228,222,214,0.98); --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
+  --text:#1a1a2e; --muted:#6b7280; --muted2:#9ca3af;
+  background:#f0ede8!important;
+}
+body.light-mode #bg-canvas { opacity:0.12; }
+body.light-mode .nav-bar { background:rgba(240,236,230,0.94); border-bottom-color:rgba(0,0,0,0.06); }
+body.light-mode .home-header { background:linear-gradient(180deg,#e8e3da 0%,#f0ede8 100%); }
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;align-items:flex-end;justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal-sheet { background:var(--surface2);border-radius:24px 24px 0 0;padding:20px 20px 48px;width:100%;max-width:430px;max-height:88vh;overflow-y:auto;animation:sheetUp 0.3s cubic-bezier(0.4,0,0.2,1); }
+@keyframes sheetUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.modal-handle { width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px; }
+.modal-title { font-family:var(--serif);font-size:22px;margin-bottom:6px;color:var(--text); }
+.modal-cancel { width:100%;background:none;border:none;color:var(--muted);font-family:var(--sans);font-size:15px;cursor:pointer;padding:10px;margin-top:4px; }
+
+/* ── MEETING / DATE / REMINDER ITEMS ── */
+.meeting-item, .date-item, .reminder-item {
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;position:relative;
+}
+.meeting-item-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+.meeting-type-badge { font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-dim);border-radius:8px;padding:2px 8px; }
+.meeting-item-date, .date-item-days { font-size:11px;color:var(--muted); }
+.meeting-item-notes { font-size:13px;color:var(--text);line-height:1.5; }
+.date-item { display:flex;align-items:center;gap:12px; }
+.date-item-icon { font-size:22px;flex-shrink:0; }
+.date-item-type { font-size:11px;color:var(--accent);font-weight:600; }
+.date-item-date { font-size:14px;color:var(--text);font-weight:500; }
+.reminder-item { display:flex;gap:12px;align-items:flex-start; }
+.reminder-urgent { border-color:rgba(200,169,110,0.4);background:var(--accent-dim); }
+.reminder-dot { width:9px;height:9px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px; }
+.reminder-date { font-size:11px;color:var(--accent);font-weight:600;margin-bottom:3px; }
+.reminder-note { font-size:13px;color:var(--text); }
+.delete-item-btn { position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted2);font-size:14px;cursor:pointer;padding:4px;line-height:1; }
+
+/* ── UPCOMING STRIP ── */
+.upcoming-strip { margin:0 20px 12px;background:var(--accent-dim);border:1px solid rgba(200,169,110,0.25);border-radius:14px;padding:12px 14px; }
+.upcoming-strip-title { font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);font-weight:600;margin-bottom:8px; }
+.upcoming-item { display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(200,169,110,0.1); }
+.upcoming-item:last-child { border-bottom:none; }
+.upcoming-name { font-size:13px;color:var(--text);font-weight:500;flex:1; }
+.upcoming-what { font-size:12px;color:var(--muted); }
+.upcoming-when { font-size:11px;color:var(--accent);font-weight:700;flex-shrink:0; }
+
+/* ── PROFILE SEARCH ── */
+.profile-search { margin:0 20px 10px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 14px; }
+.profile-search input { flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:14px; }
+.profile-search input::placeholder { color:var(--muted); }
+.search-highlight { background:rgba(200,169,110,0.3);border-radius:2px;padding:0 1px; }
+
+/* ── CONTACT / SOCIAL ROWS ── */
+.contact-row, .social-row {
+  display:flex; align-items:center; justify-content:space-between;
+  transition:background 0.15s; border-radius:12px; padding:2px 4px;
+}
+.contact-row:active, .social-row:active { background:var(--surface2); }
+
 /* ── EMPTY STATE ── */
 .empty-state { text-align:center; padding:56px 28px; }
 .empty-icon { font-size:44px; margin-bottom:14px; opacity:0.4; }
@@ -564,8 +627,17 @@ body {
 <!-- ═══════════ HOME SCREEN ═══════════ -->
 <div class="screen" id="home">
   <div class="home-header">
-    <div class="home-brand">Orbit</div>
-    <div class="home-sub">People intelligence layer</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <div class="home-brand">Orbit</div>
+        <div class="home-sub">People intelligence layer</div>
+      </div>
+      <button onclick="toggleTheme()" id="theme-btn" style="
+        margin-top:8px;background:var(--surface2);border:1px solid var(--border);
+        color:var(--muted);border-radius:50%;width:36px;height:36px;
+        font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      ">🌙</button>
+    </div>
     <div class="home-stats">
       <div class="home-stat">
         <div class="home-stat-num" id="stat-total">0</div>
@@ -591,10 +663,23 @@ body {
   <div class="filter-row">
     <button class="filter-chip active" onclick="setFilter('all',this)">All</button>
     <button class="filter-chip" onclick="setFilter('recent',this)">Recent</button>
+    <button class="filter-chip" onclick="setFilter('inner circle',this)">Inner Circle</button>
     <button class="filter-chip" onclick="setFilter('leader',this)">Leaders</button>
     <button class="filter-chip" onclick="setFilter('peer',this)">Peers</button>
+    <button class="filter-chip" onclick="setFilter('direct report',this)">Direct Reports</button>
     <button class="filter-chip" onclick="setFilter('client',this)">Clients</button>
-    <button class="filter-chip" onclick="setFilter('other',this)">Other</button>
+    <button class="filter-chip" onclick="setFilter('family',this)">Family</button>
+    <button class="filter-chip" onclick="setFilter('friends',this)">Friends</button>
+    <button class="filter-chip" onclick="setFilter('church',this)">Church</button>
+    <button class="filter-chip" onclick="setFilter('basketball',this)">Basketball</button>
+    <button class="filter-chip" onclick="setFilter('fishing',this)">Fishing</button>
+    <button class="filter-chip" onclick="setFilter('work',this)">Work</button>
+    <button class="filter-chip" onclick="setFilter('mentor',this)">Mentors</button>
+  </div>
+
+  <div id="upcoming-strip" style="display:none;" class="upcoming-strip">
+    <div class="upcoming-strip-title">🔔 Coming Up</div>
+    <div id="upcoming-items"></div>
   </div>
 
   <div class="people-list" id="people-list">
@@ -642,20 +727,61 @@ body {
       <input class="form-input" type="text" placeholder="e.g. Acme Corp" id="company-input">
     </div>
     <div class="form-section" style="margin-top:14px;">
-      <label class="form-label">Relationship Type</label>
-      <div class="quick-options" id="rel-type-opts">
-        <button class="qopt" onclick="selectRelType(this)">Leader / Boss</button>
-        <button class="qopt" onclick="selectRelType(this)">Peer / Colleague</button>
-        <button class="qopt" onclick="selectRelType(this)">Direct Report</button>
-        <button class="qopt" onclick="selectRelType(this)">Client</button>
-        <button class="qopt" onclick="selectRelType(this)">Partner</button>
-        <button class="qopt" onclick="selectRelType(this)">Mentor</button>
-        <button class="qopt" onclick="selectRelType(this)">Other</button>
+      <label class="form-label">Categories <span style="color:var(--muted);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">— select all that apply</span></label>
+      <div class="quick-options" id="rel-type-opts" style="gap:8px;">
+        <button class="qopt" onclick="toggleCategory(this)">Leader / Boss</button>
+        <button class="qopt" onclick="toggleCategory(this)">Peer / Colleague</button>
+        <button class="qopt" onclick="toggleCategory(this)">Direct Report</button>
+        <button class="qopt" onclick="toggleCategory(this)">Client</button>
+        <button class="qopt" onclick="toggleCategory(this)">Partner</button>
+        <button class="qopt" onclick="toggleCategory(this)">Mentor</button>
+        <button class="qopt" onclick="toggleCategory(this)">Other</button>
+        <button class="qopt" onclick="toggleCategory(this)">Inner Circle</button>
+        <button class="qopt" onclick="toggleCategory(this)">Family</button>
+        <button class="qopt" onclick="toggleCategory(this)">Friends</button>
+        <button class="qopt" onclick="toggleCategory(this)">Work</button>
+        <button class="qopt" onclick="toggleCategory(this)">Church</button>
+        <button class="qopt" onclick="toggleCategory(this)">Basketball</button>
+        <button class="qopt" onclick="toggleCategory(this)">Fishing</button>
       </div>
     </div>
     <div class="form-section" style="margin-top:14px;">
       <label class="form-label">Where did you meet?</label>
       <input class="form-input" type="text" placeholder="e.g. Leadership offsite, Q4 conference…" id="met-where">
+    </div>
+
+    <div class="form-section" style="margin-top:20px;">
+      <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">📱 Contact Details <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">— optional</span></div>
+      <label class="form-label">Mobile Number</label>
+      <input class="form-input" type="tel" placeholder="e.g. +61 412 345 678" id="contact-mobile" style="margin-bottom:12px;">
+      <label class="form-label">Email Address</label>
+      <input class="form-input" type="email" placeholder="e.g. name@company.com" id="contact-email" style="margin-bottom:12px;">
+      <label class="form-label">Home / Work Address</label>
+      <textarea class="form-input" placeholder="e.g. 12 Main St, Sydney NSW 2000" id="contact-address" style="min-height:60px;resize:none;margin-bottom:12px;"></textarea>
+    </div>
+
+    <div class="form-section" style="margin-top:4px;">
+      <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">🎂 Key Dates <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">— optional</span></div>
+      <label class="form-label">Birthday</label>
+      <input class="form-input" type="date" id="contact-birthday" style="margin-bottom:12px;">
+      <label class="form-label">Work Anniversary</label>
+      <input class="form-input" type="date" id="contact-work-anniversary" style="margin-bottom:12px;">
+      <label class="form-label">Other Anniversary</label>
+      <input class="form-input" type="date" id="contact-other-anniversary" style="margin-bottom:12px;">
+    </div>
+
+    <div class="form-section" style="margin-top:4px;padding-bottom:24px;">
+      <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">🌐 Social Media <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">— optional</span></div>
+      <label class="form-label">LinkedIn</label>
+      <input class="form-input" type="text" placeholder="e.g. linkedin.com/in/username or just username" id="contact-linkedin" style="margin-bottom:12px;">
+      <label class="form-label">Instagram</label>
+      <input class="form-input" type="text" placeholder="e.g. @username" id="contact-instagram" style="margin-bottom:12px;">
+      <label class="form-label">X / Twitter</label>
+      <input class="form-input" type="text" placeholder="e.g. @username" id="contact-twitter" style="margin-bottom:12px;">
+      <label class="form-label">Facebook</label>
+      <input class="form-input" type="text" placeholder="e.g. facebook.com/username" id="contact-facebook" style="margin-bottom:12px;">
+      <label class="form-label">Other Handle / URL</label>
+      <input class="form-input" type="text" placeholder="e.g. TikTok, YouTube, website…" id="contact-social-other">
     </div>
   </div>
 </div>
@@ -735,11 +861,20 @@ body {
 
     <div class="profile-tabs">
       <div class="ptab active" onclick="switchTab('overview',this)">Overview</div>
+      <div class="ptab" onclick="switchTab('contact',this)">Contact</div>
       <div class="ptab" onclick="switchTab('family',this)">Family</div>
       <div class="ptab" onclick="switchTab('career',this)">Career</div>
       <div class="ptab" onclick="switchTab('personal',this)">Personal</div>
       <div class="ptab" onclick="switchTab('goals',this)">Goals</div>
+      <div class="ptab" onclick="switchTab('meetings',this)">Meetings</div>
+      <div class="ptab" onclick="switchTab('dates',this)">Dates</div>
       <div class="ptab" onclick="switchTab('notes',this)">Notes</div>
+    </div>
+
+    <div class="profile-search">
+      <span style="color:var(--muted);font-size:14px;">🔍</span>
+      <input type="text" placeholder="Search this profile…" id="profile-search-input" oninput="searchProfile(this.value)">
+      <button id="search-clear" onclick="clearProfileSearch()" style="display:none;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0;">✕</button>
     </div>
 
     <div class="profile-content">
@@ -749,13 +884,114 @@ body {
           <div class="info-row"><div class="info-row-label">Location</div><div class="info-row-value" id="pf-location">—</div></div>
         </div>
         <div class="info-section">
-          <div class="info-section-title">🤝 Relationship</div>
-          <div class="info-row"><div class="info-row-label">Type</div><div class="info-row-value" id="pf-reltype">—</div></div>
+          <div class="info-section-title">🏷️ Categories</div>
+          <div class="info-row"><div class="info-row-value" id="pf-reltype" style="display:flex;flex-wrap:wrap;gap:6px;"></div></div>
           <div class="info-row"><div class="info-row-label">Met At</div><div class="info-row-value" id="pf-metat">—</div></div>
         </div>
         <div class="info-section">
           <div class="info-section-title">🎭 Personality</div>
           <div class="personality-grid" id="pf-personality"></div>
+        </div>
+      </div>
+
+      <!-- ── CONTACT DETAILS TAB ── -->
+      <div class="tab-panel" id="tab-contact">
+        <div class="info-section">
+          <div class="info-section-title">📱 Contact Details</div>
+          <div class="info-row contact-row" id="row-mobile" onclick="callOrCopy('mobile')" style="cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">📞</span>
+              <div>
+                <div class="info-row-label">Mobile</div>
+                <div class="info-row-value" id="pf-mobile">—</div>
+              </div>
+            </div>
+            <div id="mobile-action" style="display:none;font-size:12px;color:var(--accent);font-weight:600;">Tap to call</div>
+          </div>
+          <div class="info-row contact-row" id="row-email" onclick="callOrCopy('email')" style="cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">✉️</span>
+              <div>
+                <div class="info-row-label">Email</div>
+                <div class="info-row-value" id="pf-email">—</div>
+              </div>
+            </div>
+            <div id="email-action" style="display:none;font-size:12px;color:var(--accent);font-weight:600;">Tap to email</div>
+          </div>
+          <div class="info-row contact-row" id="row-address" onclick="callOrCopy('address')" style="cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">📍</span>
+              <div>
+                <div class="info-row-label">Address</div>
+                <div class="info-row-value" id="pf-address">—</div>
+              </div>
+            </div>
+            <div id="address-action" style="display:none;font-size:12px;color:var(--accent);font-weight:600;">Tap to map</div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <div class="info-section-title">🎂 Key Dates</div>
+          <div class="info-row">
+            <div class="info-row-label">Birthday</div>
+            <div class="info-row-value" id="pf-birthday">—</div>
+          </div>
+          <div class="info-row">
+            <div class="info-row-label">Work Anniversary</div>
+            <div class="info-row-value" id="pf-work-anniversary">—</div>
+          </div>
+          <div class="info-row">
+            <div class="info-row-label">Other Anniversary</div>
+            <div class="info-row-value" id="pf-other-anniversary">—</div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <div class="info-section-title">🌐 Social Media</div>
+          <div class="info-row social-row" onclick="openSocial('linkedin')" style="cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:28px;height:28px;background:#0077b5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">in</div>
+              <div>
+                <div class="info-row-label">LinkedIn</div>
+                <div class="info-row-value" id="pf-linkedin">—</div>
+              </div>
+            </div>
+            <div id="linkedin-action" style="display:none;font-size:12px;color:var(--accent);font-weight:600;">Open ↗</div>
+          </div>
+          <div class="info-row social-row" onclick="openSocial('instagram')" style="cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:28px;height:28px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">📷</div>
+              <div>
+                <div class="info-row-label">Instagram</div>
+                <div class="info-row-value" id="pf-instagram">—</div>
+              </div>
+            </div>
+            <div id="instagram-action" style="display:none;font-size:12px;color:var(--accent);font-weight:600;">Open ↗</div>
+          </div>
+          <div class="info-row social-row" onclick="openSocial('twitter')" style="cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:28px;height:28px;background:#000;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">✕</div>
+              <div>
+                <div class="info-row-label">X / Twitter</div>
+                <div class="info-row-value" id="pf-twitter">—</div>
+              </div>
+            </div>
+            <div id="twitter-action" style="display:none;font-size:12px;color:var(--accent);font-weight:600;">Open ↗</div>
+          </div>
+          <div class="info-row social-row" onclick="openSocial('facebook')" style="cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:28px;height:28px;background:#1877f2;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">f</div>
+              <div>
+                <div class="info-row-label">Facebook</div>
+                <div class="info-row-value" id="pf-facebook">—</div>
+              </div>
+            </div>
+            <div id="facebook-action" style="display:none;font-size:12px;color:var(--accent);font-weight:600;">Open ↗</div>
+          </div>
+          <div class="info-row">
+            <div class="info-row-label">Other Handle / URL</div>
+            <div class="info-row-value" id="pf-social-other">—</div>
+          </div>
         </div>
       </div>
       <div class="tab-panel" id="tab-family">
@@ -804,9 +1040,72 @@ body {
           <div class="info-row"><div class="info-row-label">Communication Preferences</div><div class="info-row-value" id="pf-comms">—</div></div>
         </div>
       </div>
+
+      <!-- MEETINGS TAB -->
+      <div class="tab-panel" id="tab-meetings">
+        <div class="info-section">
+          <div class="info-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>📅 Meeting Log</span>
+            <button onclick="openMeetingModal()" style="background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);border-radius:10px;padding:4px 12px;font-size:12px;cursor:pointer;">+ Log</button>
+          </div>
+          <div id="meetings-list"><div style="color:var(--muted2);font-size:13px;font-style:italic;padding:8px 0;">No meetings logged yet.</div></div>
+        </div>
+      </div>
+
+      <!-- DATES TAB -->
+      <div class="tab-panel" id="tab-dates">
+        <div class="info-section">
+          <div class="info-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>🎂 Birthdays & Anniversaries</span>
+            <button onclick="openBirthdayModal()" style="background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);border-radius:10px;padding:4px 12px;font-size:12px;cursor:pointer;">+ Add</button>
+          </div>
+          <div id="dates-list"><div style="color:var(--muted2);font-size:13px;font-style:italic;padding:8px 0;">No dates saved yet.</div></div>
+        </div>
+        <div class="info-section" style="margin-top:4px;">
+          <div class="info-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>🔔 Reminders</span>
+            <button onclick="openReminderModal()" style="background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);border-radius:10px;padding:4px 12px;font-size:12px;cursor:pointer;">+ Set</button>
+          </div>
+          <div id="reminders-list"><div style="color:var(--muted2);font-size:13px;font-style:italic;padding:8px 0;">No reminders set.</div></div>
+        </div>
+      </div>
+
+    </div><!-- /profile-content -->
+  </div><!-- /scroll-body -->
+
+  <!-- Profile completeness bar -->
+  <div id="completeness-bar" style="
+    position:sticky;bottom:0;z-index:50;
+    background:rgba(10,12,18,0.95);backdrop-filter:blur(12px);
+    padding:10px 20px 28px;border-top:1px solid var(--border);
+  ">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Profile Completeness</span>
+      <span style="font-size:12px;font-weight:600;color:var(--accent);" id="completeness-pct">0%</span>
+    </div>
+    <div style="height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;">
+      <div id="completeness-fill" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);width:0%;"></div>
     </div>
   </div>
-  <button class="edit-fab" onclick="editProfile()">✏️</button>
+
+  <!-- Profile action menu -->
+  <div style="position:fixed;bottom:72px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;align-items:flex-end;" id="profile-actions">
+    <div id="action-menu" style="display:none;flex-direction:column;gap:6px;align-items:flex-end;">
+      <button onclick="editProfile()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:9px 16px;font-size:13px;cursor:pointer;white-space:nowrap;">✏️ Edit Profile</button>
+      <button onclick="openAI()" style="background:var(--surface2);border:1px solid var(--border);color:var(--ai);border-radius:14px;padding:9px 16px;font-size:13px;cursor:pointer;white-space:nowrap;">✨ AI Insights</button>
+      <button onclick="openReminderModal()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:9px 16px;font-size:13px;cursor:pointer;white-space:nowrap;">🔔 Set Reminder</button>
+      <button onclick="openMeetingModal()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:9px 16px;font-size:13px;cursor:pointer;white-space:nowrap;">📅 Log Meeting</button>
+      <button onclick="exportProfilePDF()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:9px 16px;font-size:13px;cursor:pointer;white-space:nowrap;">📄 Export PDF</button>
+      <button onclick="deleteCurrentPerson()" style="background:rgba(224,96,96,0.1);border:1px solid rgba(224,96,96,0.3);color:#e06060;border-radius:14px;padding:9px 16px;font-size:13px;cursor:pointer;white-space:nowrap;">🗑️ Delete</button>
+    </div>
+    <button onclick="toggleActionMenu()" id="action-fab" style="
+      width:52px;height:52px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent2),var(--accent));
+      border:none;color:#0a0c12;font-size:22px;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;box-shadow:0 4px 20px rgba(200,169,110,0.35);
+    ">⋯</button>
+  </div>
 </div>
 
 <!-- ═══════════ AI SCREEN ═══════════ -->
@@ -855,13 +1154,71 @@ body {
 </div>
 
 <!-- ═══════════ BACKGROUND CANVAS ═══════════ -->
-<canvas id="bg-canvas" style="
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  z-index:0; pointer-events:none;
-"></canvas>
+<canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
 
 <!-- ═══════════ TOAST ═══════════ -->
 <div class="toast" id="toast"></div>
+
+<!-- ═══════════ REMINDER MODAL ═══════════ -->
+<div class="modal-overlay" id="reminder-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Set Follow-up Reminder</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;" id="reminder-person-name">—</div>
+    <label class="form-label">Reminder Date</label>
+    <input type="date" class="form-input" id="reminder-date" style="margin-bottom:14px;">
+    <label class="form-label">Note</label>
+    <textarea class="form-input" id="reminder-note" placeholder="e.g. Check in about the project, wish happy birthday…" style="min-height:80px;resize:none;margin-bottom:16px;"></textarea>
+    <button class="btn-setup" onclick="saveReminder()" style="margin-bottom:10px;">Save Reminder</button>
+    <button class="modal-cancel" onclick="closeModal('reminder-modal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══════════ MEETING LOG MODAL ═══════════ -->
+<div class="modal-overlay" id="meeting-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Log a Meeting</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;" id="meeting-person-name">—</div>
+    <label class="form-label">Date</label>
+    <input type="date" class="form-input" id="meeting-date" style="margin-bottom:14px;">
+    <label class="form-label">Type</label>
+    <div class="quick-options" id="meeting-type-opts" style="margin-bottom:14px;">
+      <button class="qopt" onclick="selectMeetingType(this)">1:1</button>
+      <button class="qopt" onclick="selectMeetingType(this)">Team Meeting</button>
+      <button class="qopt" onclick="selectMeetingType(this)">Casual Chat</button>
+      <button class="qopt" onclick="selectMeetingType(this)">Social</button>
+      <button class="qopt" onclick="selectMeetingType(this)">Call</button>
+      <button class="qopt" onclick="selectMeetingType(this)">Other</button>
+    </div>
+    <label class="form-label">Notes</label>
+    <textarea class="form-input" id="meeting-notes" placeholder="What was discussed? Any key takeaways or follow-ups?" style="min-height:100px;resize:none;margin-bottom:16px;"></textarea>
+    <button class="btn-setup" onclick="saveMeeting()" style="margin-bottom:10px;">Save Meeting Log</button>
+    <button class="modal-cancel" onclick="closeModal('meeting-modal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══════════ BIRTHDAY MODAL ═══════════ -->
+<div class="modal-overlay" id="birthday-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add Birthday / Anniversary</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;" id="birthday-person-name">—</div>
+    <label class="form-label">Type</label>
+    <div class="quick-options" id="bday-type-opts" style="margin-bottom:14px;">
+      <button class="qopt" onclick="selectBdayType(this)">Birthday</button>
+      <button class="qopt" onclick="selectBdayType(this)">Work Anniversary</button>
+      <button class="qopt" onclick="selectBdayType(this)">Wedding Anniversary</button>
+      <button class="qopt" onclick="selectBdayType(this)">Other</button>
+    </div>
+    <label class="form-label">Date</label>
+    <input type="date" class="form-input" id="birthday-date" style="margin-bottom:14px;">
+    <label class="form-label">Note (optional)</label>
+    <input type="text" class="form-input" id="birthday-note" placeholder="e.g. Loves chocolate cake…" style="margin-bottom:16px;">
+    <button class="btn-setup" onclick="saveBirthday()" style="margin-bottom:10px;">Save Date</button>
+    <button class="modal-cancel" onclick="closeModal('birthday-modal')">Cancel</button>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════
@@ -873,7 +1230,7 @@ let notionDB = localStorage.getItem('orbit-notion-db') || '';
 let currentPerson = null;
 let currentPersonIndex = -1;
 let currentQ = 0;
-let selectedRelType = '';
+let selectedRelType = []; // now supports multiple categories
 let photoDataUrl = '';
 let selectedPersonality = [];
 let aiChatHistory = [];
@@ -909,10 +1266,12 @@ const questions = [
 // INIT
 // ═══════════════════════════════════════════════
 function init() {
+  applyTheme();
   if (notionToken && notionDB) {
     show('home');
     renderPeopleList();
     updateStats();
+    renderUpcomingStrip();
     refreshFromNotion();
   } else {
     show('setup');
@@ -1016,6 +1375,11 @@ function personToNotionBody(person) {
     a.motivators       ? `Motivators: ${a.motivators}` : '',
     a['leadership-tips'] ? `Leadership Tips: ${a['leadership-tips']}` : '',
     a.notes            ? `Notes: ${a.notes}` : '',
+    // Structured data as JSON blobs
+    (person.meetings && person.meetings.length)   ? `MeetingsJSON: ${JSON.stringify(person.meetings)}` : '',
+    (person.dates && person.dates.length)         ? `DatesJSON: ${JSON.stringify(person.dates)}` : '',
+    (person.reminders && person.reminders.length) ? `RemindersJSON: ${JSON.stringify(person.reminders)}` : '',
+    (person.contact && Object.values(person.contact).some(v=>v)) ? `ContactJSON: ${JSON.stringify(person.contact)}` : '',
   ].filter(Boolean);
 
   return lines.map(line => ({
@@ -1090,6 +1454,7 @@ async function refreshFromNotion() {
       localStorage.setItem('orbit-people', JSON.stringify(people));
       renderPeopleList();
       updateStats();
+      renderUpcomingStrip();
       setTimeout(() => { if(debug) debug.style.display='none'; }, 10000);
       return;
     }
@@ -1157,7 +1522,11 @@ async function refreshFromNotion() {
           motivators: get('Motivators'),
           'leadership-tips': get('Leadership Tips'),
           notes: get('Notes'),
-        }
+        },
+        meetings: (() => { try { return JSON.parse(get('MeetingsJSON')||'[]'); } catch{return [];} })(),
+        dates:    (() => { try { return JSON.parse(get('DatesJSON')||'[]'); } catch{return [];} })(),
+        reminders:(() => { try { return JSON.parse(get('RemindersJSON')||'[]'); } catch{return [];} })(),
+        contact:  (() => { try { return JSON.parse(get('ContactJSON')||'{}'); } catch{return {};} })(),
       });
     }
 
@@ -1172,6 +1541,7 @@ async function refreshFromNotion() {
     localStorage.setItem('orbit-people', JSON.stringify(people));
     renderPeopleList();
     updateStats();
+    renderUpcomingStrip();
     showToast(`✅ ${people.length} profile${people.length !== 1 ? 's' : ''} synced`);
     setTimeout(() => { if(debug) debug.style.display='none'; }, 6000);
 
@@ -1180,6 +1550,7 @@ async function refreshFromNotion() {
     console.error('Refresh error:', e);
     renderPeopleList();
     updateStats();
+    renderUpcomingStrip();
     showToast('⚠️ ' + (e.message || 'Notion sync failed'));
   }
 }
@@ -1193,14 +1564,18 @@ function show(id) {
   window.scrollTo(0,0);
 }
 
-function goHome() { show('home'); renderPeopleList(); updateStats(); }
+function goHome() { show('home'); renderPeopleList(); updateStats(); renderUpcomingStrip(); }
 
 function startAddPerson() {
   currentPerson = {};
-  selectedRelType = '';
+  selectedRelType = [];
   photoDataUrl = '';
   selectedPersonality = [];
-  ['first-name','last-name','role-input','company-input','met-where'].forEach(id => document.getElementById(id).value = '');
+  ['first-name','last-name','role-input','company-input','met-where',
+   'contact-mobile','contact-email','contact-address','contact-birthday',
+   'contact-work-anniversary','contact-other-anniversary',
+   'contact-linkedin','contact-instagram','contact-twitter','contact-facebook','contact-social-other'
+  ].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   document.getElementById('photo-preview').style.display = 'none';
   document.getElementById('photo-picker').children[0].style.display = '';
   document.getElementById('photo-picker').children[1].style.display = '';
@@ -1212,17 +1587,31 @@ function startInterview() {
   const first = document.getElementById('first-name').value.trim();
   const last = document.getElementById('last-name').value.trim();
   if (!first) { showToast('⚠️ Please enter a first name'); return; }
+  const gv = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
   currentPerson = {
     id: Date.now(),
     firstName: first, lastName: last,
     fullName: (first+' '+last).trim(),
-    role: document.getElementById('role-input').value.trim(),
-    company: document.getElementById('company-input').value.trim(),
-    relType: selectedRelType,
-    metWhere: document.getElementById('met-where').value.trim(),
+    role: gv('role-input'),
+    company: gv('company-input'),
+    relType: selectedRelType.join(', '),
+    metWhere: gv('met-where'),
     photo: photoDataUrl,
     dateAdded: new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}),
-    synced: false, answers: {}
+    synced: false, answers: {},
+    contact: {
+      mobile:           gv('contact-mobile'),
+      email:            gv('contact-email'),
+      address:          gv('contact-address'),
+      birthday:         gv('contact-birthday'),
+      workAnniversary:  gv('contact-work-anniversary'),
+      otherAnniversary: gv('contact-other-anniversary'),
+      linkedin:         gv('contact-linkedin'),
+      instagram:        gv('contact-instagram'),
+      twitter:          gv('contact-twitter'),
+      facebook:         gv('contact-facebook'),
+      socialOther:      gv('contact-social-other'),
+    }
   };
   currentQ = 0;
   show('interview');
@@ -1330,7 +1719,22 @@ function loadProfile(person) {
 
   const a = person.answers || {};
   setText('pf-location', a.location);
-  setText('pf-reltype', person.relType);
+  // Render categories as chips
+  const reltypeEl = document.getElementById('pf-reltype');
+  if (reltypeEl) {
+    reltypeEl.innerHTML = '';
+    if (person.relType && person.relType.trim()) {
+      person.relType.split(',').map(c => c.trim()).filter(Boolean).forEach(cat => {
+        const chip = document.createElement('span');
+        chip.className = 'ptag';
+        chip.textContent = cat;
+        chip.style.cssText = 'background:var(--accent-dim);color:var(--accent);border:1px solid rgba(200,169,110,0.25);border-radius:10px;padding:3px 10px;font-size:12px;';
+        reltypeEl.appendChild(chip);
+      });
+    } else {
+      reltypeEl.innerHTML = '<span style="color:var(--muted2);font-style:italic;font-size:14px;">Not captured yet</span>';
+    }
+  }
   setText('pf-metat', person.metWhere);
   setText('pf-partner', a.partner);
   setText('pf-children', a.children);
@@ -1354,6 +1758,21 @@ function loadProfile(person) {
   setText('pf-leadership-tips', a['leadership-tips']);
   setText('pf-comms', a.comms);
 
+  // ── Contact Details ──
+  const c = person.contact || {};
+  setContactField('pf-mobile',   c.mobile,   'mobile',   c.mobile ? 'Tap to call' : '');
+  setContactField('pf-email',    c.email,    'email',    c.email  ? 'Tap to email': '');
+  setContactField('pf-address',  c.address,  'address',  c.address? 'Tap to map'  : '');
+  setContactField('pf-linkedin',  c.linkedin,  'linkedin',  c.linkedin  ? 'Open ↗' : '');
+  setContactField('pf-instagram', c.instagram, 'instagram', c.instagram ? 'Open ↗' : '');
+  setContactField('pf-twitter',   c.twitter,   'twitter',   c.twitter   ? 'Open ↗' : '');
+  setContactField('pf-facebook',  c.facebook,  'facebook',  c.facebook  ? 'Open ↗' : '');
+  setText('pf-social-other', c.socialOther);
+  // Key dates
+  setText('pf-birthday',          c.birthday         ? formatDate(c.birthday)         : '');
+  setText('pf-work-anniversary',  c.workAnniversary  ? formatDate(c.workAnniversary)  : '');
+  setText('pf-other-anniversary', c.otherAnniversary ? formatDate(c.otherAnniversary) : '');
+
   const pg = document.getElementById('pf-personality');
   pg.innerHTML = '';
   if (a.personality) {
@@ -1366,6 +1785,12 @@ function loadProfile(person) {
     pg.innerHTML = '<div style="color:var(--muted2);font-size:12px;font-style:italic;grid-column:1/-1;padding:4px 0;">No personality notes yet</div>';
   }
   switchTab('overview', document.querySelector('.ptab'));
+  clearProfileSearch();
+  renderMeetings();
+  renderDates();
+  renderReminders();
+  updateCompleteness(person);
+  closeActionMenu();
 }
 
 function setText(id, val) {
@@ -1378,6 +1803,46 @@ function setText(id, val) {
   }
 }
 
+function setContactField(id, val, actionId, actionLabel) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (val && String(val).trim()) {
+    el.textContent = val; el.classList.remove('empty');
+    const act = document.getElementById(actionId + '-action');
+    if (act) { act.textContent = actionLabel; act.style.display = 'block'; }
+  } else {
+    el.textContent = 'Not captured yet'; el.classList.add('empty');
+    const act = document.getElementById(actionId + '-action');
+    if (act) act.style.display = 'none';
+  }
+}
+
+function callOrCopy(type) {
+  const c = currentPerson?.contact || {};
+  if (type === 'mobile' && c.mobile) {
+    window.location.href = 'tel:' + c.mobile.replace(/\s/g,'');
+  } else if (type === 'email' && c.email) {
+    window.location.href = 'mailto:' + c.email;
+  } else if (type === 'address' && c.address) {
+    const q = encodeURIComponent(c.address);
+    window.open('https://maps.google.com/?q=' + q, '_blank');
+  }
+}
+
+function openSocial(platform) {
+  const c = currentPerson?.contact || {};
+  const handles = { linkedin: c.linkedin, instagram: c.instagram, twitter: c.twitter, facebook: c.facebook };
+  const val = handles[platform];
+  if (!val) return;
+  const bases = {
+    linkedin:  v => v.startsWith('http') ? v : 'https://linkedin.com/in/' + v.replace('@',''),
+    instagram: v => 'https://instagram.com/' + v.replace('@',''),
+    twitter:   v => 'https://x.com/' + v.replace('@',''),
+    facebook:  v => v.startsWith('http') ? v : 'https://facebook.com/' + v.replace('@',''),
+  };
+  window.open(bases[platform](val), '_blank');
+}
+
 function switchTab(name, el) {
   document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -1386,8 +1851,38 @@ function switchTab(name, el) {
 }
 
 function editProfile() {
+  closeActionMenu();
   currentPersonIndex = people.findIndex(p => p.id === currentPerson.id);
-  currentQ = 0; show('interview'); renderQuestion();
+
+  // Pre-fill basic fields
+  const sv = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
+  sv('first-name',   currentPerson.firstName);
+  sv('last-name',    currentPerson.lastName);
+  sv('role-input',   currentPerson.role);
+  sv('company-input',currentPerson.company);
+  sv('met-where',    currentPerson.metWhere);
+
+  // Pre-fill contact fields
+  const c = currentPerson.contact || {};
+  sv('contact-mobile',            c.mobile);
+  sv('contact-email',             c.email);
+  sv('contact-address',           c.address);
+  sv('contact-birthday',          c.birthday);
+  sv('contact-work-anniversary',  c.workAnniversary);
+  sv('contact-other-anniversary', c.otherAnniversary);
+  sv('contact-linkedin',          c.linkedin);
+  sv('contact-instagram',         c.instagram);
+  sv('contact-twitter',           c.twitter);
+  sv('contact-facebook',          c.facebook);
+  sv('contact-social-other',      c.socialOther);
+
+  // Pre-select categories
+  selectedRelType = currentPerson.relType ? currentPerson.relType.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  document.querySelectorAll('#rel-type-opts .qopt').forEach(b => {
+    b.classList.toggle('selected', selectedRelType.includes(b.textContent.trim()));
+  });
+
+  show('add-person');
 }
 
 async function deleteCurrentPerson() {
@@ -1420,11 +1915,13 @@ function openAI() {
 
 function buildProfileSummary(person) {
   const a = person.answers || {};
+  const c = person.contact || {};
   const fields = [
     ['Full Name', person.fullName],
     ['Role', person.role],
     ['Company', person.company],
-    ['Relationship Type', person.relType],
+    ['Categories', person.relType],
+    ['Birthday', c.birthday ? formatDate(c.birthday) : ''],
     ['Location', a.location],
     ['Partner/Spouse', a.partner],
     ['Children', a.children],
@@ -1674,8 +2171,12 @@ function renderPeopleList(filtered=null) {
     const initials = (person.firstName?.[0]||'') + (person.lastName?.[0]||'');
     const avatarHtml = person.photo ? `<img src="${person.photo}" alt="">` : (initials||'?');
     const tags = [];
-    if (person.relType) tags.push(person.relType.split(' ')[0]);
-    if (person.answers?.personality) person.answers.personality.split(',').slice(0,2).forEach(t=>tags.push(t.trim()));
+    if (person.relType) {
+      person.relType.split(',').slice(0, 3).forEach(t => tags.push(t.trim()));
+    }
+    if (person.answers?.personality) person.answers.personality.split(',').slice(0,1).forEach(t=>tags.push(t.trim()));
+    const pct = calcCompleteness(person);
+    const pctColor = pct >= 80 ? '#6eb89a' : pct >= 50 ? '#c8a96e' : '#555a6a';
 
     card.innerHTML = `
       <div class="sync-dot ${person.synced?'synced':'pending'}"></div>
@@ -1685,7 +2186,13 @@ function renderPeopleList(filtered=null) {
         <div class="person-role">${[person.role,person.company].filter(Boolean).join(' · ')||'No role'}</div>
         <div class="person-tags">${tags.map(t=>`<span class="ptag">${t}</span>`).join('')}</div>
       </div>
-      <div style="color:var(--muted);font-size:16px;">›</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
+        <div style="font-size:11px;font-weight:700;color:${pctColor};">${pct}%</div>
+        <div style="width:28px;height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${pctColor};border-radius:2px;"></div>
+        </div>
+        <div style="color:var(--muted);font-size:14px;">›</div>
+      </div>
     `;
     card.onclick = () => { loadProfile(person); show('profile'); };
     list.appendChild(card);
@@ -1715,10 +2222,514 @@ function handlePhoto(input) {
   reader.readAsDataURL(file);
 }
 
-function selectRelType(btn) {
-  document.querySelectorAll('#rel-type-opts .qopt').forEach(b=>b.classList.remove('selected'));
+function toggleCategory(btn) {
+  const cat = btn.textContent.trim();
+  if (selectedRelType.includes(cat)) {
+    selectedRelType = selectedRelType.filter(c => c !== cat);
+    btn.classList.remove('selected');
+  } else {
+    selectedRelType.push(cat);
+    btn.classList.add('selected');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// DARK / LIGHT MODE
+// ═══════════════════════════════════════════════
+let isDark = localStorage.getItem('orbit-theme') !== 'light';
+
+function toggleTheme() {
+  isDark = !isDark;
+  document.body.classList.toggle('light-mode', !isDark);
+  document.getElementById('theme-btn').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('orbit-theme', isDark ? 'dark' : 'light');
+}
+
+function applyTheme() {
+  if (!isDark) {
+    document.body.classList.add('light-mode');
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = '☀️';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PROFILE COMPLETENESS
+// ═══════════════════════════════════════════════
+function calcCompleteness(person) {
+  const c = person.contact || {};
+  const checks = [
+    person.firstName, person.lastName, person.role, person.company,
+    person.relType, person.photo,
+    person.answers?.location, person.answers?.partner, person.answers?.children,
+    person.answers?.['career-bg'], person.answers?.achievements, person.answers?.['work-style'],
+    person.answers?.sports, person.answers?.hobbies, person.answers?.personality,
+    person.answers?.['career-goals'], person.answers?.['life-goals'], person.answers?.notes,
+    person.answers?.motivators, person.answers?.comms,
+    // Contact details contribute to completeness
+    c.mobile, c.email, c.birthday
+  ];
+  const filled = checks.filter(v => v && String(v).trim()).length;
+  return Math.round((filled / checks.length) * 100);
+}
+
+function updateCompleteness(person) {
+  const pct = calcCompleteness(person);
+  const fill = document.getElementById('completeness-fill');
+  const label = document.getElementById('completeness-pct');
+  if (fill) fill.style.width = pct + '%';
+  if (label) {
+    label.textContent = pct + '%';
+    label.style.color = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--accent)' : 'var(--muted)';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PROFILE ACTION MENU
+// ═══════════════════════════════════════════════
+function toggleActionMenu() {
+  const menu = document.getElementById('action-menu');
+  const fab = document.getElementById('action-fab');
+  const open = menu.style.display !== 'flex';
+  menu.style.display = open ? 'flex' : 'none';
+  fab.textContent = open ? '✕' : '⋯';
+  fab.style.background = open ? 'rgba(224,96,96,0.8)' : 'linear-gradient(135deg,var(--accent2),var(--accent))';
+}
+
+function closeActionMenu() {
+  const menu = document.getElementById('action-menu');
+  const fab = document.getElementById('action-fab');
+  if (menu) menu.style.display = 'none';
+  if (fab) { fab.textContent = '⋯'; fab.style.background = 'linear-gradient(135deg,var(--accent2),var(--accent))'; }
+}
+
+// ═══════════════════════════════════════════════
+// SEARCH WITHIN PROFILE
+// ═══════════════════════════════════════════════
+function searchProfile(query) {
+  const clear = document.getElementById('search-clear');
+  if (clear) clear.style.display = query ? 'block' : 'none';
+
+  if (!query.trim()) { clearProfileSearch(); return; }
+
+  const q = query.toLowerCase();
+  const content = document.querySelector('.profile-content');
+  if (!content) return;
+
+  // Show all tabs to search across them
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'block');
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+
+  // Highlight matches in info-row-value elements
+  document.querySelectorAll('.info-row-value, .info-row-label').forEach(el => {
+    const orig = el.dataset.orig || el.textContent;
+    el.dataset.orig = orig;
+    if (orig.toLowerCase().includes(q)) {
+      el.innerHTML = orig.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'),
+        '<span class="search-highlight">$1</span>');
+    } else {
+      el.textContent = orig;
+    }
+  });
+}
+
+function clearProfileSearch() {
+  const input = document.getElementById('profile-search-input');
+  const clear = document.getElementById('search-clear');
+  if (input) input.value = '';
+  if (clear) clear.style.display = 'none';
+
+  document.querySelectorAll('.info-row-value, .info-row-label').forEach(el => {
+    if (el.dataset.orig) { el.textContent = el.dataset.orig; delete el.dataset.orig; }
+  });
+
+  // Restore normal tab view
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  switchTab('overview', document.querySelector('.ptab'));
+}
+
+// ═══════════════════════════════════════════════
+// MEETINGS
+// ═══════════════════════════════════════════════
+let selectedMeetingType = '';
+
+function openMeetingModal() {
+  closeActionMenu();
+  selectedMeetingType = '';
+  document.getElementById('meeting-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('meeting-notes').value = '';
+  document.getElementById('meeting-person-name').textContent = currentPerson?.fullName || '';
+  document.querySelectorAll('#meeting-type-opts .qopt').forEach(b => b.classList.remove('selected'));
+  document.getElementById('meeting-modal').classList.add('open');
+}
+
+function selectMeetingType(btn) {
+  document.querySelectorAll('#meeting-type-opts .qopt').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
-  selectedRelType = btn.textContent;
+  selectedMeetingType = btn.textContent;
+}
+
+function saveMeeting() {
+  const date = document.getElementById('meeting-date').value;
+  const notes = document.getElementById('meeting-notes').value.trim();
+  if (!date) { showToast('⚠️ Please select a date'); return; }
+
+  if (!currentPerson.meetings) currentPerson.meetings = [];
+  currentPerson.meetings.unshift({
+    id: Date.now(),
+    date, type: selectedMeetingType || 'Meeting', notes,
+    added: new Date().toISOString()
+  });
+
+  savePerson();
+  closeModal('meeting-modal');
+  renderMeetings();
+  showToast('✅ Meeting logged');
+}
+
+function renderMeetings() {
+  const list = document.getElementById('meetings-list');
+  if (!list) return;
+  const meetings = currentPerson?.meetings || [];
+  if (!meetings.length) {
+    list.innerHTML = '<div style="color:var(--muted2);font-size:13px;font-style:italic;padding:8px 0;">No meetings logged yet.</div>';
+    return;
+  }
+  list.innerHTML = meetings.map((m,i) => `
+    <div class="meeting-item">
+      <button class="delete-item-btn" onclick="deleteMeeting(${i})">✕</button>
+      <div class="meeting-item-header">
+        <span class="meeting-type-badge">${m.type}</span>
+        <span class="meeting-item-date">${formatDate(m.date)}</span>
+      </div>
+      ${m.notes ? `<div class="meeting-item-notes">${m.notes}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function deleteMeeting(idx) {
+  currentPerson.meetings.splice(idx, 1);
+  savePerson(); renderMeetings();
+}
+
+// ═══════════════════════════════════════════════
+// BIRTHDAYS & ANNIVERSARIES
+// ═══════════════════════════════════════════════
+let selectedBdayType = '';
+
+function openBirthdayModal() {
+  closeActionMenu();
+  selectedBdayType = '';
+  document.getElementById('birthday-date').value = '';
+  document.getElementById('birthday-note').value = '';
+  document.getElementById('birthday-person-name').textContent = currentPerson?.fullName || '';
+  document.querySelectorAll('#bday-type-opts .qopt').forEach(b => b.classList.remove('selected'));
+  document.getElementById('birthday-modal').classList.add('open');
+}
+
+function selectBdayType(btn) {
+  document.querySelectorAll('#bday-type-opts .qopt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedBdayType = btn.textContent;
+}
+
+function saveBirthday() {
+  const date = document.getElementById('birthday-date').value;
+  const note = document.getElementById('birthday-note').value.trim();
+  if (!date || !selectedBdayType) { showToast('⚠️ Please select type and date'); return; }
+
+  if (!currentPerson.dates) currentPerson.dates = [];
+  currentPerson.dates.push({ id: Date.now(), type: selectedBdayType, date, note });
+
+  savePerson();
+  closeModal('birthday-modal');
+  renderDates();
+  renderUpcomingStrip();
+  showToast('✅ Date saved');
+}
+
+function daysUntil(dateStr) {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const d = new Date(dateStr);
+  // Set to this year
+  const thisYear = new Date(now.getFullYear(), d.getMonth(), d.getDate());
+  if (thisYear < now) thisYear.setFullYear(now.getFullYear() + 1);
+  return Math.round((thisYear - now) / 86400000);
+}
+
+function renderDates() {
+  const list = document.getElementById('dates-list');
+  if (!list) return;
+  const dates = (currentPerson?.dates || []).sort((a,b) => daysUntil(a.date) - daysUntil(b.date));
+  if (!dates.length) {
+    list.innerHTML = '<div style="color:var(--muted2);font-size:13px;font-style:italic;padding:8px 0;">No dates saved yet.</div>';
+    return;
+  }
+  const icons = { 'Birthday':'🎂','Work Anniversary':'🏆','Wedding Anniversary':'💍','Other':'📅' };
+  list.innerHTML = dates.map((d,i) => {
+    const days = daysUntil(d.date);
+    const when = days === 0 ? '🎉 Today!' : days === 1 ? 'Tomorrow' : `In ${days} days`;
+    return `
+    <div class="date-item" style="position:relative;">
+      <button class="delete-item-btn" onclick="deleteDate(${i})">✕</button>
+      <div class="date-item-icon">${icons[d.type]||'📅'}</div>
+      <div>
+        <div class="date-item-type">${d.type}</div>
+        <div class="date-item-date">${formatDate(d.date)}</div>
+        <div class="date-item-days" style="color:${days<=7?'var(--accent)':'var(--muted)'};">${when}${d.note?'  ·  '+d.note:''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteDate(idx) {
+  currentPerson.dates.splice(idx, 1);
+  savePerson(); renderDates(); renderUpcomingStrip();
+}
+
+// ═══════════════════════════════════════════════
+// REMINDERS
+// ═══════════════════════════════════════════════
+function openReminderModal() {
+  closeActionMenu();
+  document.getElementById('reminder-date').value = '';
+  document.getElementById('reminder-note').value = '';
+  document.getElementById('reminder-person-name').textContent = currentPerson?.fullName || '';
+  document.getElementById('reminder-modal').classList.add('open');
+}
+
+function saveReminder() {
+  const date = document.getElementById('reminder-date').value;
+  const note = document.getElementById('reminder-note').value.trim();
+  if (!date) { showToast('⚠️ Please select a date'); return; }
+
+  if (!currentPerson.reminders) currentPerson.reminders = [];
+  currentPerson.reminders.push({ id: Date.now(), date, note });
+  currentPerson.reminders.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  savePerson();
+  closeModal('reminder-modal');
+  renderReminders();
+  renderUpcomingStrip();
+  showToast('✅ Reminder set');
+}
+
+function renderReminders() {
+  const list = document.getElementById('reminders-list');
+  if (!list) return;
+  const reminders = currentPerson?.reminders || [];
+  if (!reminders.length) {
+    list.innerHTML = '<div style="color:var(--muted2);font-size:13px;font-style:italic;padding:8px 0;">No reminders set.</div>';
+    return;
+  }
+  list.innerHTML = reminders.map((r,i) => {
+    const days = Math.round((new Date(r.date) - new Date().setHours(0,0,0,0)) / 86400000);
+    const urgent = days <= 3;
+    return `
+    <div class="reminder-item ${urgent?'reminder-urgent':''}">
+      <button class="delete-item-btn" onclick="deleteReminder(${i})">✕</button>
+      <div class="reminder-dot"></div>
+      <div class="reminder-info">
+        <div class="reminder-date">${formatDate(r.date)}${days===0?' · Today!':days===1?' · Tomorrow':days<0?' · Overdue':''}</div>
+        <div class="reminder-note">${r.note||'Follow up'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteReminder(idx) {
+  currentPerson.reminders.splice(idx, 1);
+  savePerson(); renderReminders(); renderUpcomingStrip();
+}
+
+// ═══════════════════════════════════════════════
+// UPCOMING STRIP (home screen)
+// ═══════════════════════════════════════════════
+function renderUpcomingStrip() {
+  const strip = document.getElementById('upcoming-strip');
+  const container = document.getElementById('upcoming-items');
+  if (!strip || !container) return;
+
+  const upcoming = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  people.forEach(p => {
+    // Dates within 14 days
+    (p.dates||[]).forEach(d => {
+      const days = daysUntil(d.date);
+      if (days <= 14) upcoming.push({ name: p.fullName, what: d.type, days, person: p });
+    });
+    // Reminders within 7 days
+    (p.reminders||[]).forEach(r => {
+      const days = Math.round((new Date(r.date) - today) / 86400000);
+      if (days >= 0 && days <= 7) upcoming.push({ name: p.fullName, what: r.note || 'Follow up', days, person: p });
+    });
+  });
+
+  upcoming.sort((a,b) => a.days - b.days);
+
+  if (!upcoming.length) { strip.style.display = 'none'; return; }
+
+  strip.style.display = 'block';
+  container.innerHTML = upcoming.slice(0,4).map(u => `
+    <div class="upcoming-item" onclick="loadProfile(people.find(p=>p.fullName==='${u.name}'));show('profile');" style="cursor:pointer;">
+      <span class="upcoming-name">${u.name}</span>
+      <span class="upcoming-what">${u.what}</span>
+      <span class="upcoming-when">${u.days===0?'Today':u.days===1?'Tomorrow':'In '+u.days+'d'}</span>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// PDF EXPORT
+// ═══════════════════════════════════════════════
+function exportProfilePDF() {
+  closeActionMenu();
+  const p = currentPerson;
+  const a = p.answers || {};
+  const c = p.contact || {};
+  const pct = calcCompleteness(p);
+
+  const field = (label, val) => val && val.trim()
+    ? `<tr><td style="color:#7a7f90;padding:6px 12px 6px 0;vertical-align:top;font-size:12px;width:140px;white-space:nowrap;">${label}</td><td style="padding:6px 0;font-size:13px;color:#1a1a2e;line-height:1.5;">${val}</td></tr>`
+    : '';
+
+  const section = (title, rows) => rows
+    ? `<div style="margin-bottom:20px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#c8a96e;font-weight:700;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #e8d9b8;">${title}</div>
+        <table style="width:100%;border-collapse:collapse;">${rows}</table>
+       </div>` : '';
+
+  const meetings = (p.meetings||[]).slice(0,5).map(m =>
+    `<div style="margin-bottom:8px;padding:8px;background:#f9f6f0;border-radius:6px;border-left:3px solid #c8a96e;">
+      <span style="font-size:11px;color:#c8a96e;font-weight:600;">${m.type}</span>
+      <span style="font-size:11px;color:#7a7f90;margin-left:8px;">${formatDate(m.date)}</span>
+      ${m.notes ? `<div style="font-size:12px;color:#1a1a2e;margin-top:4px;">${m.notes}</div>` : ''}
+     </div>`
+  ).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Orbit — ${p.fullName}</title>
+  <style>
+    body{font-family:Georgia,serif;background:#fff;color:#1a1a2e;margin:0;padding:0;}
+    @media print{body{margin:0;}@page{margin:15mm;}}
+  </style></head><body>
+  <div style="max-width:700px;margin:0 auto;padding:32px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #c8a96e;">
+      <div>
+        <div style="font-size:28px;font-weight:700;color:#0a0c12;">${p.fullName}</div>
+        <div style="font-size:14px;color:#7a7f90;margin-top:4px;">${[p.role,p.company].filter(Boolean).join(' · ')||''}</div>
+        ${p.relType ? `<div style="font-size:12px;color:#c8a96e;margin-top:6px;">${p.relType}</div>` : ''}
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:10px;color:#7a7f90;text-transform:uppercase;letter-spacing:1px;">Profile Complete</div>
+        <div style="font-size:24px;font-weight:700;color:#c8a96e;">${pct}%</div>
+        <div style="font-size:10px;color:#7a7f90;">Generated ${new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</div>
+      </div>
+    </div>
+
+    ${section('📱 Contact Details', [
+      field('Mobile',   c.mobile),
+      field('Email',    c.email),
+      field('Address',  c.address),
+    ].join(''))}
+
+    ${section('🎂 Key Dates', [
+      field('Birthday',          c.birthday         ? formatDate(c.birthday)         : ''),
+      field('Work Anniversary',  c.workAnniversary  ? formatDate(c.workAnniversary)  : ''),
+      field('Other Anniversary', c.otherAnniversary ? formatDate(c.otherAnniversary) : ''),
+    ].join(''))}
+
+    ${section('🌐 Social Media', [
+      field('LinkedIn',  c.linkedin),
+      field('Instagram', c.instagram),
+      field('X/Twitter', c.twitter),
+      field('Facebook',  c.facebook),
+      field('Other',     c.socialOther),
+    ].join(''))}
+
+    ${section('📍 Personal', [
+      field('Location', a.location),
+      field('Met At', p.metWhere),
+      field('Date Added', p.dateAdded),
+    ].join(''))}
+
+    ${section('👨‍👩‍👧 Family', [
+      field('Partner', a.partner),
+      field('Children', a.children),
+      field('Family Notes', a['family-sit'] ? (a['family-sit'] + (a['family-notes'] ? ' · ' + a['family-notes'] : '')) : a['family-notes']),
+    ].join(''))}
+
+    ${section('💼 Career', [
+      field('Background', a['career-bg']),
+      field('Achievements', a.achievements),
+      field('Working Style', a['work-style']),
+      field('Challenges', a.challenges),
+    ].join(''))}
+
+    ${section('⚽ Interests', [
+      field('Sports', a.sports),
+      field('Hobbies', a.hobbies),
+      field('Passions', a.passions),
+      field('Teams', a.teams),
+    ].join(''))}
+
+    ${section('🎭 Personality', [
+      field('Traits', a.personality),
+      field('Communication', a.comms),
+    ].join(''))}
+
+    ${section('🎯 Goals', [
+      field('Career Goals', a['career-goals']),
+      field('Life Goals', a['life-goals']),
+      field('Priorities', a.priorities),
+      field('Motivators', a.motivators),
+    ].join(''))}
+
+    ${section('📝 Notes', [
+      field('Leadership Tips', a['leadership-tips']),
+      field('General Notes', a.notes),
+    ].join(''))}
+
+    ${meetings ? `<div style="margin-bottom:20px;"><div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#c8a96e;font-weight:700;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #e8d9b8;">📅 Recent Meetings</div>${meetings}</div>` : ''}
+
+    <div style="margin-top:32px;padding-top:12px;border-top:1px solid #e8d9b8;font-size:10px;color:#aaa;text-align:center;">Generated by Orbit People Intelligence · Confidential</div>
+  </div>
+  <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`;
+
+  const win = window.open('', '_blank');
+  if (win) { win.document.write(html); win.document.close(); }
+  else showToast('⚠️ Allow popups to export PDF');
+}
+
+// ═══════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ═══════════════════════════════════════════════
+// SAVE PERSON (persist updates locally + Notion)
+// ═══════════════════════════════════════════════
+function savePerson() {
+  const idx = people.findIndex(p => p.id === currentPerson.id);
+  if (idx >= 0) people[idx] = currentPerson;
+  else people.unshift(currentPerson);
+  localStorage.setItem('orbit-people', JSON.stringify(people));
+  // Background Notion sync
+  syncToNotion(currentPerson).then(() => {
+    localStorage.setItem('orbit-people', JSON.stringify(people));
+  });
+}
+
+// ═══════════════════════════════════════════════
+// FORMAT DATE HELPER
+// ═══════════════════════════════════════════════
+function formatDate(str) {
+  if (!str) return '';
+  try {
+    return new Date(str + 'T00:00:00').toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+  } catch { return str; }
 }
 
 // ═══════════════════════════════════════════════
