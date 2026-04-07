@@ -561,6 +561,15 @@ body.light-mode .home-header { background:linear-gradient(180deg,#e8e3da 0%,#f0e
 .profile-search input::placeholder { color:var(--muted); }
 .search-highlight { background:rgba(200,169,110,0.3);border-radius:2px;padding:0 1px; }
 
+/* ── EDIT PROFILE SCREEN ── */
+.edit-section-header {
+  font-size:13px; font-weight:700; color:var(--accent);
+  padding:10px 0 10px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:14px;
+  letter-spacing:0.3px;
+}
+
 /* ── CONTACT / SOCIAL ROWS ── */
 .contact-row, .social-row {
   display:flex; align-items:center; justify-content:space-between;
@@ -1105,6 +1114,184 @@ body.light-mode .home-header { background:linear-gradient(180deg,#e8e3da 0%,#f0e
       display:flex;align-items:center;justify-content:center;
       cursor:pointer;box-shadow:0 4px 20px rgba(200,169,110,0.35);
     ">⋯</button>
+  </div>
+</div>
+
+<!-- ═══════════ EDIT PROFILE SCREEN ═══════════ -->
+<div class="screen" id="edit-profile">
+  <div class="nav-bar">
+    <button class="nav-back" onclick="cancelEdit()">←</button>
+    <span class="nav-title">Edit Profile</span>
+    <button class="nav-action" id="save-profile-btn" onclick="saveProfileFromForm()">Save ✓</button>
+  </div>
+
+  <div class="scroll-body" style="padding-bottom:60px;">
+
+    <!-- Basic Info -->
+    <div class="form-section" style="margin-top:12px;">
+      <div class="edit-section-header">👤 Basic Info</div>
+      <label class="form-label">First Name</label>
+      <input class="form-input" type="text" id="ep-first" style="margin-bottom:10px;">
+      <label class="form-label">Last Name</label>
+      <input class="form-input" type="text" id="ep-last" style="margin-bottom:10px;">
+      <label class="form-label">Role / Title</label>
+      <input class="form-input" type="text" id="ep-role" style="margin-bottom:10px;">
+      <label class="form-label">Company</label>
+      <input class="form-input" type="text" id="ep-company" style="margin-bottom:10px;">
+      <label class="form-label">Where did you meet?</label>
+      <input class="form-input" type="text" id="ep-met" style="margin-bottom:10px;">
+      <label class="form-label">Categories <span style="color:var(--muted);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">— select all that apply</span></label>
+      <div class="quick-options" id="ep-cat-opts" style="gap:8px;">
+        <button class="qopt" onclick="epToggleCat(this)">Leader / Boss</button>
+        <button class="qopt" onclick="epToggleCat(this)">Peer / Colleague</button>
+        <button class="qopt" onclick="epToggleCat(this)">Direct Report</button>
+        <button class="qopt" onclick="epToggleCat(this)">Client</button>
+        <button class="qopt" onclick="epToggleCat(this)">Partner</button>
+        <button class="qopt" onclick="epToggleCat(this)">Mentor</button>
+        <button class="qopt" onclick="epToggleCat(this)">Inner Circle</button>
+        <button class="qopt" onclick="epToggleCat(this)">Family</button>
+        <button class="qopt" onclick="epToggleCat(this)">Friends</button>
+        <button class="qopt" onclick="epToggleCat(this)">Work</button>
+        <button class="qopt" onclick="epToggleCat(this)">Church</button>
+        <button class="qopt" onclick="epToggleCat(this)">Basketball</button>
+        <button class="qopt" onclick="epToggleCat(this)">Fishing</button>
+        <button class="qopt" onclick="epToggleCat(this)">Other</button>
+      </div>
+    </div>
+
+    <!-- Contact Details -->
+    <div class="form-section" style="margin-top:20px;">
+      <div class="edit-section-header">📱 Contact Details</div>
+      <label class="form-label">Mobile</label>
+      <input class="form-input" type="tel" id="ep-mobile" style="margin-bottom:10px;">
+      <label class="form-label">Email</label>
+      <input class="form-input" type="email" id="ep-email" style="margin-bottom:10px;">
+      <label class="form-label">Address</label>
+      <textarea class="form-input" id="ep-address" style="min-height:60px;resize:none;margin-bottom:10px;"></textarea>
+      <label class="form-label">Birthday</label>
+      <input class="form-input" type="date" id="ep-birthday" style="margin-bottom:10px;">
+      <label class="form-label">Work Anniversary</label>
+      <input class="form-input" type="date" id="ep-work-ann" style="margin-bottom:10px;">
+      <label class="form-label">Other Anniversary</label>
+      <input class="form-input" type="date" id="ep-other-ann" style="margin-bottom:10px;">
+    </div>
+
+    <!-- Social Media -->
+    <div class="form-section" style="margin-top:20px;">
+      <div class="edit-section-header">🌐 Social Media</div>
+      <label class="form-label">LinkedIn</label>
+      <input class="form-input" type="text" id="ep-linkedin" style="margin-bottom:10px;">
+      <label class="form-label">Instagram</label>
+      <input class="form-input" type="text" id="ep-instagram" style="margin-bottom:10px;">
+      <label class="form-label">X / Twitter</label>
+      <input class="form-input" type="text" id="ep-twitter" style="margin-bottom:10px;">
+      <label class="form-label">Facebook</label>
+      <input class="form-input" type="text" id="ep-facebook" style="margin-bottom:10px;">
+      <label class="form-label">Other Handle / URL</label>
+      <input class="form-input" type="text" id="ep-social-other" style="margin-bottom:10px;">
+    </div>
+
+    <!-- Family -->
+    <div class="form-section" style="margin-top:20px;">
+      <div class="edit-section-header">👨‍👩‍👧 Family</div>
+      <label class="form-label">Partner / Spouse</label>
+      <input class="form-input" type="text" id="ep-partner" style="margin-bottom:10px;">
+      <label class="form-label">Children</label>
+      <input class="form-input" type="text" id="ep-children" style="margin-bottom:10px;">
+      <label class="form-label">Family Situation</label>
+      <textarea class="form-input" id="ep-family-sit" style="min-height:70px;resize:none;margin-bottom:10px;"></textarea>
+      <label class="form-label">Important Family Notes</label>
+      <textarea class="form-input" id="ep-family-notes" style="min-height:70px;resize:none;margin-bottom:10px;"></textarea>
+      <label class="form-label">Location</label>
+      <input class="form-input" type="text" id="ep-location" style="margin-bottom:10px;">
+    </div>
+
+    <!-- Career -->
+    <div class="form-section" style="margin-top:20px;">
+      <div class="edit-section-header">💼 Career</div>
+      <label class="form-label">Career Background</label>
+      <textarea class="form-input" id="ep-career-bg" style="min-height:80px;resize:none;margin-bottom:10px;"></textarea>
+      <label class="form-label">Key Achievements</label>
+      <textarea class="form-input" id="ep-achievements" style="min-height:80px;resize:none;margin-bottom:10px;"></textarea>
+      <label class="form-label">Working Style</label>
+      <input class="form-input" type="text" id="ep-work-style" style="margin-bottom:10px;">
+      <label class="form-label">Current Challenges</label>
+      <textarea class="form-input" id="ep-challenges" style="min-height:70px;resize:none;margin-bottom:10px;"></textarea>
+    </div>
+
+    <!-- Personal -->
+    <div class="form-section" style="margin-top:20px;">
+      <div class="edit-section-header">⚽ Hobbies & Interests</div>
+      <label class="form-label">Sports</label>
+      <input class="form-input" type="text" id="ep-sports" style="margin-bottom:10px;">
+      <label class="form-label">Hobbies</label>
+      <input class="form-input" type="text" id="ep-hobbies" style="margin-bottom:10px;">
+      <label class="form-label">Passions</label>
+      <input class="form-input" type="text" id="ep-passions" style="margin-bottom:10px;">
+      <label class="form-label">Favourite Teams</label>
+      <input class="form-input" type="text" id="ep-teams" style="margin-bottom:10px;">
+    </div>
+
+    <!-- Personality -->
+    <div class="form-section" style="margin-top:20px;">
+      <div class="edit-section-header">🎭 Personality</div>
+      <label class="form-label">Personality Traits <span style="color:var(--muted);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">— select all that apply</span></label>
+      <div class="quick-options" id="ep-personality-opts" style="gap:8px;margin-bottom:12px;">
+        <button class="qopt" onclick="epTogglePersonality(this)">Extrovert</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Introvert</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Analytical</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Intuitive</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Direct</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Diplomatic</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Big-picture</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Detail-focused</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Optimistic</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Cautious</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Competitive</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Collaborative</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Empathetic</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Reserved</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Humorous</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Serious</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Creative</button>
+        <button class="qopt" onclick="epTogglePersonality(this)">Structured</button>
+      </div>
+      <label class="form-label">Communication Style</label>
+      <input class="form-input" type="text" id="ep-comms" style="margin-bottom:10px;">
+    </div>
+
+    <!-- Goals -->
+    <div class="form-section" style="margin-top:20px;">
+      <div class="edit-section-header">🎯 Life & Work Goals</div>
+      <label class="form-label">Career Goals</label>
+      <textarea class="form-input" id="ep-career-goals" style="min-height:70px;resize:none;margin-bottom:10px;"></textarea>
+      <label class="form-label">Life Goals</label>
+      <textarea class="form-input" id="ep-life-goals" style="min-height:70px;resize:none;margin-bottom:10px;"></textarea>
+      <label class="form-label">Current Priorities</label>
+      <input class="form-input" type="text" id="ep-priorities" style="margin-bottom:10px;">
+      <label class="form-label">Motivators</label>
+      <input class="form-input" type="text" id="ep-motivators" style="margin-bottom:10px;">
+    </div>
+
+    <!-- Notes -->
+    <div class="form-section" style="margin-top:20px;">
+      <div class="edit-section-header">📝 Notes</div>
+      <label class="form-label">Leadership Tips</label>
+      <textarea class="form-input" id="ep-leadership-tips" style="min-height:80px;resize:none;margin-bottom:10px;"></textarea>
+      <label class="form-label">General Notes</label>
+      <textarea class="form-input" id="ep-notes" style="min-height:100px;resize:none;margin-bottom:10px;"></textarea>
+    </div>
+
+    <!-- Sticky save button at bottom -->
+    <div style="position:sticky;bottom:0;padding:16px 20px 32px;background:rgba(10,12,18,0.97);backdrop-filter:blur(12px);margin-top:24px;">
+      <button onclick="saveProfileFromForm()" style="
+        width:100%;background:linear-gradient(135deg,var(--accent2),var(--accent));
+        border:none;border-radius:16px;padding:16px;
+        color:#0a0c12;font-family:var(--sans);font-size:16px;font-weight:700;
+        cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+      ">💾 Save to Notion</button>
+    </div>
+
   </div>
 </div>
 
@@ -1910,41 +2097,186 @@ function switchTab(name, el) {
 
 function editProfile() {
   closeActionMenu();
-  currentPersonIndex = people.findIndex(p => p.id === currentPerson.id);
+  openEditScreen();
+}
 
-  // Pre-fill basic fields
-  const sv = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
-  sv('first-name',   currentPerson.firstName);
-  sv('last-name',    currentPerson.lastName);
-  sv('role-input',   currentPerson.role);
-  sv('company-input',currentPerson.company);
-  sv('met-where',    currentPerson.metWhere);
+// ─── Open the dedicated edit screen pre-filled with current person data ───
+function openEditScreen() {
+  const p = currentPerson;
+  const a = p.answers || {};
+  const c = p.contact || {};
 
-  // Pre-fill contact fields
-  const c = currentPerson.contact || {};
-  sv('contact-mobile',            c.mobile);
-  sv('contact-email',             c.email);
-  sv('contact-address',           c.address);
-  sv('contact-birthday',          c.birthday);
-  sv('contact-work-anniversary',  c.workAnniversary);
-  sv('contact-other-anniversary', c.otherAnniversary);
-  sv('contact-linkedin',          c.linkedin);
-  sv('contact-instagram',         c.instagram);
-  sv('contact-twitter',           c.twitter);
-  sv('contact-facebook',          c.facebook);
-  sv('contact-social-other',      c.socialOther);
+  const sv = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
-  // Pre-select categories
-  selectedRelType = currentPerson.relType ? currentPerson.relType.split(',').map(s=>s.trim()).filter(Boolean) : [];
-  document.querySelectorAll('#rel-type-opts .qopt').forEach(b => {
-    b.classList.toggle('selected', selectedRelType.includes(b.textContent.trim()));
+  // Basic info
+  sv('ep-first',   p.firstName);
+  sv('ep-last',    p.lastName);
+  sv('ep-role',    p.role);
+  sv('ep-company', p.company);
+  sv('ep-met',     p.metWhere);
+
+  // Categories
+  const cats = p.relType ? p.relType.split(',').map(s => s.trim()).filter(Boolean) : [];
+  document.querySelectorAll('#ep-cat-opts .qopt').forEach(b => {
+    b.classList.toggle('selected', cats.includes(b.textContent.trim()));
   });
 
-  // Update labels to reflect edit mode
-  const beginBtn = document.getElementById('begin-btn');
-  if (beginBtn) beginBtn.textContent = 'Update →';
+  // Contact
+  sv('ep-mobile',     c.mobile);
+  sv('ep-email',      c.email);
+  sv('ep-address',    c.address);
+  sv('ep-birthday',   c.birthday);
+  sv('ep-work-ann',   c.workAnniversary);
+  sv('ep-other-ann',  c.otherAnniversary);
+  sv('ep-linkedin',   c.linkedin);
+  sv('ep-instagram',  c.instagram);
+  sv('ep-twitter',    c.twitter);
+  sv('ep-facebook',   c.facebook);
+  sv('ep-social-other', c.socialOther);
 
-  show('add-person');
+  // Family
+  sv('ep-partner',      a.partner);
+  sv('ep-children',     a.children);
+  sv('ep-family-sit',   a['family-sit']);
+  sv('ep-family-notes', a['family-notes']);
+  sv('ep-location',     a.location);
+
+  // Career
+  sv('ep-career-bg',    a['career-bg']);
+  sv('ep-achievements', a.achievements);
+  sv('ep-work-style',   a['work-style']);
+  sv('ep-challenges',   a.challenges);
+
+  // Personal
+  sv('ep-sports',   a.sports);
+  sv('ep-hobbies',  a.hobbies);
+  sv('ep-passions', a.passions);
+  sv('ep-teams',    a.teams);
+
+  // Personality chips
+  const traits = a.personality ? a.personality.split(',').map(s => s.trim()).filter(Boolean) : [];
+  document.querySelectorAll('#ep-personality-opts .qopt').forEach(b => {
+    b.classList.toggle('selected', traits.includes(b.textContent.trim()));
+  });
+  sv('ep-comms', a.comms);
+
+  // Goals
+  sv('ep-career-goals',    a['career-goals']);
+  sv('ep-life-goals',      a['life-goals']);
+  sv('ep-priorities',      a.priorities);
+  sv('ep-motivators',      a.motivators);
+
+  // Notes
+  sv('ep-leadership-tips', a['leadership-tips']);
+  sv('ep-notes',           a.notes);
+
+  show('edit-profile');
+}
+
+// ─── Toggle categories in edit screen ───
+function epToggleCat(btn) {
+  btn.classList.toggle('selected');
+}
+
+// ─── Toggle personality in edit screen ───
+function epTogglePersonality(btn) {
+  btn.classList.toggle('selected');
+}
+
+// ─── Cancel edit — go back to profile ───
+function cancelEdit() {
+  show('profile');
+}
+
+// ─── Collect form values and save to Notion ───
+async function saveProfileFromForm() {
+  const btn = document.getElementById('save-profile-btn');
+  if (btn) { btn.textContent = '⏳ Saving…'; btn.disabled = true; }
+
+  const gv = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+
+  // Collect categories
+  const cats = [...document.querySelectorAll('#ep-cat-opts .qopt.selected')]
+    .map(b => b.textContent.trim()).filter(Boolean);
+
+  // Collect personality traits — merge chips + any existing extras
+  const selectedTraits = [...document.querySelectorAll('#ep-personality-opts .qopt.selected')]
+    .map(b => b.textContent.trim()).filter(Boolean);
+
+  // Merge into currentPerson — preserve fields not shown in edit form
+  currentPerson = {
+    ...currentPerson,
+    firstName: gv('ep-first') || currentPerson.firstName,
+    lastName:  gv('ep-last')  || currentPerson.lastName,
+    fullName:  ((gv('ep-first') || currentPerson.firstName) + ' ' + (gv('ep-last') || currentPerson.lastName)).trim(),
+    role:      gv('ep-role'),
+    company:   gv('ep-company'),
+    relType:   cats.join(', '),
+    metWhere:  gv('ep-met'),
+    synced:    false,
+    contact: {
+      mobile:           gv('ep-mobile'),
+      email:            gv('ep-email'),
+      address:          gv('ep-address'),
+      birthday:         gv('ep-birthday'),
+      workAnniversary:  gv('ep-work-ann'),
+      otherAnniversary: gv('ep-other-ann'),
+      linkedin:         gv('ep-linkedin'),
+      instagram:        gv('ep-instagram'),
+      twitter:          gv('ep-twitter'),
+      facebook:         gv('ep-facebook'),
+      socialOther:      gv('ep-social-other'),
+    },
+    answers: {
+      ...currentPerson.answers,
+      partner:            gv('ep-partner'),
+      children:           gv('ep-children'),
+      'family-sit':       gv('ep-family-sit'),
+      'family-notes':     gv('ep-family-notes'),
+      location:           gv('ep-location'),
+      'career-bg':        gv('ep-career-bg'),
+      achievements:       gv('ep-achievements'),
+      'work-style':       gv('ep-work-style'),
+      challenges:         gv('ep-challenges'),
+      sports:             gv('ep-sports'),
+      hobbies:            gv('ep-hobbies'),
+      passions:           gv('ep-passions'),
+      teams:              gv('ep-teams'),
+      personality:        selectedTraits.join(','),
+      comms:              gv('ep-comms'),
+      'career-goals':     gv('ep-career-goals'),
+      'life-goals':       gv('ep-life-goals'),
+      priorities:         gv('ep-priorities'),
+      motivators:         gv('ep-motivators'),
+      'leadership-tips':  gv('ep-leadership-tips'),
+      notes:              gv('ep-notes'),
+    }
+  };
+
+  // Save locally first — instant
+  const idx = people.findIndex(p => p.id === currentPerson.id);
+  if (idx >= 0) people[idx] = currentPerson;
+  else people.unshift(currentPerson);
+  localStorage.setItem('orbit-people', JSON.stringify(people));
+
+  // Sync to Notion
+  try {
+    const ok = await syncToNotion(currentPerson);
+    currentPerson.synced = ok;
+    localStorage.setItem('orbit-people', JSON.stringify(people));
+
+    if (btn) { btn.textContent = ok ? '✅ Saved!' : '⚠️ Saved locally'; btn.disabled = false; }
+    showToast(ok ? '✅ Profile saved to Notion' : '⚠️ Saved locally — Notion sync failed');
+
+    // Return to profile after short delay so user sees confirmation
+    setTimeout(() => {
+      loadProfile(currentPerson);
+      show('profile');
+    }, 900);
+  } catch (e) {
+    if (btn) { btn.textContent = 'Save ✓'; btn.disabled = false; }
+    showToast('⚠️ Save failed — ' + e.message);
+  }
 }
 
 async function deleteCurrentPerson() {
