@@ -570,6 +570,25 @@ body.light-mode .home-header { background:linear-gradient(180deg,#e8e3da 0%,#f0e
   letter-spacing:0.3px;
 }
 
+/* ── CATEGORY TAG CHIPS ── */
+.cat-chip {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--accent-dim); border:1px solid rgba(200,169,110,0.35);
+  color:var(--accent); border-radius:20px;
+  padding:5px 10px 5px 12px; font-size:13px; font-weight:500;
+  animation: chipIn 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes chipIn {
+  from { opacity:0; transform:scale(0.8); }
+  to   { opacity:1; transform:scale(1); }
+}
+.cat-chip-remove {
+  background:none; border:none; color:var(--accent);
+  font-size:15px; cursor:pointer; padding:0; line-height:1;
+  opacity:0.7; transition:opacity 0.15s;
+}
+.cat-chip-remove:hover { opacity:1; }
+
 /* ── CONTACT / SOCIAL ROWS ── */
 .contact-row, .social-row {
   display:flex; align-items:center; justify-content:space-between;
@@ -1140,22 +1159,46 @@ body.light-mode .home-header { background:linear-gradient(180deg,#e8e3da 0%,#f0e
       <input class="form-input" type="text" id="ep-company" style="margin-bottom:10px;">
       <label class="form-label">Where did you meet?</label>
       <input class="form-input" type="text" id="ep-met" style="margin-bottom:10px;">
-      <label class="form-label">Categories <span style="color:var(--muted);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">— select all that apply</span></label>
-      <div class="quick-options" id="ep-cat-opts" style="gap:8px;">
-        <button class="qopt" onclick="epToggleCat(this)">Leader / Boss</button>
-        <button class="qopt" onclick="epToggleCat(this)">Peer / Colleague</button>
-        <button class="qopt" onclick="epToggleCat(this)">Direct Report</button>
-        <button class="qopt" onclick="epToggleCat(this)">Client</button>
-        <button class="qopt" onclick="epToggleCat(this)">Partner</button>
-        <button class="qopt" onclick="epToggleCat(this)">Mentor</button>
-        <button class="qopt" onclick="epToggleCat(this)">Inner Circle</button>
-        <button class="qopt" onclick="epToggleCat(this)">Family</button>
-        <button class="qopt" onclick="epToggleCat(this)">Friends</button>
-        <button class="qopt" onclick="epToggleCat(this)">Work</button>
-        <button class="qopt" onclick="epToggleCat(this)">Church</button>
-        <button class="qopt" onclick="epToggleCat(this)">Basketball</button>
-        <button class="qopt" onclick="epToggleCat(this)">Fishing</button>
-        <button class="qopt" onclick="epToggleCat(this)">Other</button>
+      <label class="form-label">Categories <span style="color:var(--muted);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">— tap to select or type a custom one</span></label>
+
+      <!-- Selected categories display as removable chips -->
+      <div id="ep-cat-chips" style="
+        display:flex;flex-wrap:wrap;gap:7px;
+        min-height:36px;padding:8px;
+        background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+        margin-bottom:10px;
+      "></div>
+
+      <!-- Type-to-add input -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input type="text" id="ep-cat-input" class="form-input"
+          placeholder="Type a custom category and press Enter…"
+          style="flex:1;margin-bottom:0;"
+          onkeydown="epCatKeydown(event)">
+        <button onclick="epAddCatFromInput()" style="
+          background:var(--accent-dim);border:1px solid var(--accent);
+          color:var(--accent);border-radius:12px;padding:0 16px;
+          font-size:18px;cursor:pointer;flex-shrink:0;
+        ">+</button>
+      </div>
+
+      <!-- Preset chips to tap -->
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Quick add:</div>
+      <div class="quick-options" id="ep-cat-presets" style="gap:7px;">
+        <button class="qopt" onclick="epAddPresetCat(this)">Leader / Boss</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Peer / Colleague</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Direct Report</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Client</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Partner</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Mentor</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Inner Circle</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Family</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Friends</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Work</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Church</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Basketball</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Fishing</button>
+        <button class="qopt" onclick="epAddPresetCat(this)">Other</button>
       </div>
     </div>
 
@@ -2115,11 +2158,9 @@ function openEditScreen() {
   sv('ep-company', p.company);
   sv('ep-met',     p.metWhere);
 
-  // Categories
+  // Categories — load into chip display
   const cats = p.relType ? p.relType.split(',').map(s => s.trim()).filter(Boolean) : [];
-  document.querySelectorAll('#ep-cat-opts .qopt').forEach(b => {
-    b.classList.toggle('selected', cats.includes(b.textContent.trim()));
-  });
+  epSetCats(cats);
 
   // Contact
   sv('ep-mobile',     c.mobile);
@@ -2173,9 +2214,98 @@ function openEditScreen() {
   show('edit-profile');
 }
 
-// ─── Toggle categories in edit screen ───
-function epToggleCat(btn) {
-  btn.classList.toggle('selected');
+// ═══════════════════════════════════════════════
+// CATEGORY TAG INPUT SYSTEM
+// ═══════════════════════════════════════════════
+
+// Internal state — array of currently selected categories
+let epSelectedCats = [];
+
+// Render chips into the display area
+function epRenderCats() {
+  const container = document.getElementById('ep-cat-chips');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (epSelectedCats.length === 0) {
+    container.innerHTML = '<span style="color:var(--muted2);font-size:13px;font-style:italic;padding:2px 4px;">No categories selected — tap a preset or type one below</span>';
+  } else {
+    epSelectedCats.forEach((cat, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'cat-chip';
+      chip.innerHTML = `
+        <span>${cat}</span>
+        <button class="cat-chip-remove" onclick="epRemoveCat(${i})" title="Remove">×</button>
+      `;
+      container.appendChild(chip);
+    });
+  }
+
+  // Dim preset buttons that are already selected
+  document.querySelectorAll('#ep-cat-presets .qopt').forEach(b => {
+    b.classList.toggle('selected', epSelectedCats.includes(b.textContent.trim()));
+  });
+}
+
+// Set categories from an array (used when loading existing data)
+function epSetCats(arr) {
+  epSelectedCats = [...arr];
+  epRenderCats();
+}
+
+// Add a category (deduplicates, trims)
+function epAddCat(name) {
+  const val = name.trim();
+  if (!val) return;
+  if (epSelectedCats.map(c => c.toLowerCase()).includes(val.toLowerCase())) {
+    // Shake the chip container briefly to show it's already there
+    const container = document.getElementById('ep-cat-chips');
+    if (container) {
+      container.style.borderColor = 'var(--accent)';
+      setTimeout(() => { container.style.borderColor = ''; }, 600);
+    }
+    return;
+  }
+  epSelectedCats.push(val);
+  epRenderCats();
+}
+
+// Remove a category by index
+function epRemoveCat(idx) {
+  epSelectedCats.splice(idx, 1);
+  epRenderCats();
+}
+
+// Tap a preset chip — toggle it
+function epAddPresetCat(btn) {
+  const name = btn.textContent.trim();
+  if (epSelectedCats.map(c => c.toLowerCase()).includes(name.toLowerCase())) {
+    // Already selected — remove it
+    epSelectedCats = epSelectedCats.filter(c => c.toLowerCase() !== name.toLowerCase());
+  } else {
+    epSelectedCats.push(name);
+  }
+  epRenderCats();
+}
+
+// Handle keyboard in the text input — Enter or comma adds the tag
+function epCatKeydown(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    epAddCatFromInput();
+  }
+}
+
+// Read the input field and add as a chip
+function epAddCatFromInput() {
+  const input = document.getElementById('ep-cat-input');
+  if (!input) return;
+  const val = input.value.trim().replace(/,$/, '');
+  if (val) {
+    epAddCat(val);
+    input.value = '';
+    input.focus();
+  }
 }
 
 // ─── Toggle personality in edit screen ───
@@ -2195,9 +2325,8 @@ async function saveProfileFromForm() {
 
   const gv = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
 
-  // Collect categories
-  const cats = [...document.querySelectorAll('#ep-cat-opts .qopt.selected')]
-    .map(b => b.textContent.trim()).filter(Boolean);
+  // Collect categories from tag-input state
+  const cats = epSelectedCats.filter(Boolean);
 
   // Collect personality traits — merge chips + any existing extras
   const selectedTraits = [...document.querySelectorAll('#ep-personality-opts .qopt.selected')]
