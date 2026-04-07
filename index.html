@@ -1166,20 +1166,24 @@ body.light-mode .home-header { background:linear-gradient(180deg,#e8e3da 0%,#f0e
         display:flex; flex-wrap:wrap; gap:7px; align-items:center;
         min-height:44px; padding:8px 10px;
         background:var(--surface2); border:1px solid var(--border); border-radius:14px;
-        margin-bottom:10px; cursor:text; transition:border-color 0.2s;
+        margin-bottom:6px; cursor:text; transition:border-color 0.2s;
       ">
         <!-- chips rendered here by JS, followed by the inline input -->
         <input type="text" id="ep-cat-input"
-          placeholder="Type and press Enter…"
+          placeholder="Type and press Enter to add…"
           style="
             border:none; outline:none; background:transparent;
             color:var(--text); font-family:var(--sans); font-size:14px;
             flex:1; min-width:120px; padding:2px 0;
           "
           onkeydown="epCatKeydown(event)"
+          onblur="epCatBlur()"
           onfocus="document.getElementById('ep-cat-chips').style.borderColor='var(--accent)'"
-          onblur="document.getElementById('ep-cat-chips').style.borderColor=''"
         >
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:11px;color:var(--muted);">Press <strong style="color:var(--accent);">Enter</strong> or <strong style="color:var(--accent);">,</strong> after typing · tap ✕ to remove</span>
+        <button onclick="epAddCatFromInput()" style="background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;font-weight:600;">Add +</button>
       </div>
 
       <!-- Preset chips to tap -->
@@ -1285,19 +1289,23 @@ body.light-mode .home-header { background:linear-gradient(180deg,#e8e3da 0%,#f0e
         display:flex; flex-wrap:wrap; gap:7px; align-items:center;
         min-height:44px; padding:8px 10px;
         background:var(--surface2); border:1px solid var(--border); border-radius:14px;
-        margin-bottom:10px; cursor:text; transition:border-color 0.2s;
+        margin-bottom:6px; cursor:text; transition:border-color 0.2s;
       ">
         <input type="text" id="ep-trait-input"
-          placeholder="Type a trait and press Enter…"
+          placeholder="Type a trait and press Enter to add…"
           style="
             border:none; outline:none; background:transparent;
             color:var(--text); font-family:var(--sans); font-size:14px;
             flex:1; min-width:120px; padding:2px 0;
           "
           onkeydown="epTraitKeydown(event)"
+          onblur="epTraitBlur()"
           onfocus="document.getElementById('ep-trait-chips').style.borderColor='var(--accent)'"
-          onblur="document.getElementById('ep-trait-chips').style.borderColor=''"
         >
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:11px;color:var(--muted);">Press <strong style="color:var(--accent);">Enter</strong> or <strong style="color:var(--accent);">,</strong> · tap ✕ to remove</span>
+        <button onclick="epAddTraitFromInput()" style="background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;font-weight:600;">Add +</button>
       </div>
 
       <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Quick add:</div>
@@ -2317,34 +2325,35 @@ function epAddPresetCat(btn) {
   epFocusInput();
 }
 
-// Handle keyboard in the inline input
+// Handle keyboard in the inline input — categories
 function epCatKeydown(e) {
   const input = e.target;
-
-  if (e.key === 'Enter' || e.key === ',') {
+  // Enter, comma, or semicolon all commit the current value
+  if (e.key === 'Enter' || e.key === ',' || e.key === ';') {
     e.preventDefault();
-    const val = input.value.trim().replace(/,$/, '');
-    if (val) {
-      epAddCat(val);
-      input.value = '';
-    }
+    const val = input.value.trim().replace(/[,;]$/, '');
+    if (val) { epAddCat(val); input.value = ''; }
   } else if (e.key === 'Backspace' && input.value === '' && epSelectedCats.length > 0) {
-    // Delete last chip when input is empty and Backspace pressed
     epSelectedCats.pop();
     epRenderCats();
   }
+}
+
+// Commit on blur (when user taps away on mobile)
+function epCatBlur() {
+  const input = document.getElementById('ep-cat-input');
+  if (!input) return;
+  const val = input.value.trim().replace(/[,;]$/, '');
+  if (val) { epAddCat(val); input.value = ''; }
+  document.getElementById('ep-cat-chips').style.borderColor = '';
 }
 
 // Read the input field and add as a chip (kept for any remaining + button references)
 function epAddCatFromInput() {
   const input = document.getElementById('ep-cat-input');
   if (!input) return;
-  const val = input.value.trim().replace(/,$/, '');
-  if (val) {
-    epAddCat(val);
-    input.value = '';
-    input.focus();
-  }
+  const val = input.value.trim().replace(/[,;]$/, '');
+  if (val) { epAddCat(val); input.value = ''; input.focus(); }
 }
 
 // ─── Toggle personality in edit screen (legacy — kept for safety) ───
@@ -2422,14 +2431,31 @@ function epAddPresetTrait(btn) {
 
 function epTraitKeydown(e) {
   const input = e.target;
-  if (e.key === 'Enter' || e.key === ',') {
+  if (e.key === 'Enter' || e.key === ',' || e.key === ';') {
     e.preventDefault();
-    const val = input.value.trim().replace(/,$/, '');
+    const val = input.value.trim().replace(/[,;]$/, '');
     if (val) { epAddTrait(val); input.value = ''; }
   } else if (e.key === 'Backspace' && input.value === '' && epSelectedTraits.length > 0) {
     epSelectedTraits.pop();
     epRenderTraits();
   }
+}
+
+// Commit on blur for mobile
+function epTraitBlur() {
+  const input = document.getElementById('ep-trait-input');
+  if (!input) return;
+  const val = input.value.trim().replace(/[,;]$/, '');
+  if (val) { epAddTrait(val); input.value = ''; }
+  document.getElementById('ep-trait-chips').style.borderColor = '';
+}
+
+// Add button handler for trait input
+function epAddTraitFromInput() {
+  const input = document.getElementById('ep-trait-input');
+  if (!input) return;
+  const val = input.value.trim().replace(/[,;]$/, '');
+  if (val) { epAddTrait(val); input.value = ''; input.focus(); }
 }
 
 // ─── Cancel edit — go back to profile ───
