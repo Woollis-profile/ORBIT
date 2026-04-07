@@ -1159,27 +1159,27 @@ body.light-mode .home-header { background:linear-gradient(180deg,#e8e3da 0%,#f0e
       <input class="form-input" type="text" id="ep-company" style="margin-bottom:10px;">
       <label class="form-label">Where did you meet?</label>
       <input class="form-input" type="text" id="ep-met" style="margin-bottom:10px;">
-      <label class="form-label">Categories <span style="color:var(--muted);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">— tap to select or type a custom one</span></label>
+      <label class="form-label">Categories <span style="color:var(--muted);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">— tap chips below or click the box and type</span></label>
 
-      <!-- Selected categories display as removable chips -->
-      <div id="ep-cat-chips" style="
-        display:flex;flex-wrap:wrap;gap:7px;
-        min-height:36px;padding:8px;
-        background:var(--surface2);border:1px solid var(--border);border-radius:12px;
-        margin-bottom:10px;
-      "></div>
-
-      <!-- Type-to-add input -->
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <input type="text" id="ep-cat-input" class="form-input"
-          placeholder="Type a custom category and press Enter…"
-          style="flex:1;margin-bottom:0;"
-          onkeydown="epCatKeydown(event)">
-        <button onclick="epAddCatFromInput()" style="
-          background:var(--accent-dim);border:1px solid var(--accent);
-          color:var(--accent);border-radius:12px;padding:0 16px;
-          font-size:18px;cursor:pointer;flex-shrink:0;
-        ">+</button>
+      <!-- Unified tag-input container — click anywhere to type -->
+      <div id="ep-cat-chips" onclick="epFocusInput()" style="
+        display:flex; flex-wrap:wrap; gap:7px; align-items:center;
+        min-height:44px; padding:8px 10px;
+        background:var(--surface2); border:1px solid var(--border); border-radius:14px;
+        margin-bottom:10px; cursor:text; transition:border-color 0.2s;
+      ">
+        <!-- chips rendered here by JS, followed by the inline input -->
+        <input type="text" id="ep-cat-input"
+          placeholder="Type and press Enter…"
+          style="
+            border:none; outline:none; background:transparent;
+            color:var(--text); font-family:var(--sans); font-size:14px;
+            flex:1; min-width:120px; padding:2px 0;
+          "
+          onkeydown="epCatKeydown(event)"
+          onfocus="document.getElementById('ep-cat-chips').style.borderColor='var(--accent)'"
+          onblur="document.getElementById('ep-cat-chips').style.borderColor=''"
+        >
       </div>
 
       <!-- Preset chips to tap -->
@@ -1278,26 +1278,48 @@ body.light-mode .home-header { background:linear-gradient(180deg,#e8e3da 0%,#f0e
     <!-- Personality -->
     <div class="form-section" style="margin-top:20px;">
       <div class="edit-section-header">🎭 Personality</div>
-      <label class="form-label">Personality Traits <span style="color:var(--muted);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">— select all that apply</span></label>
+      <label class="form-label">Personality Traits <span style="color:var(--muted);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">— tap presets or click the box and type</span></label>
+
+      <!-- Unified tag-input for personality -->
+      <div id="ep-trait-chips" onclick="epFocusTrait()" style="
+        display:flex; flex-wrap:wrap; gap:7px; align-items:center;
+        min-height:44px; padding:8px 10px;
+        background:var(--surface2); border:1px solid var(--border); border-radius:14px;
+        margin-bottom:10px; cursor:text; transition:border-color 0.2s;
+      ">
+        <input type="text" id="ep-trait-input"
+          placeholder="Type a trait and press Enter…"
+          style="
+            border:none; outline:none; background:transparent;
+            color:var(--text); font-family:var(--sans); font-size:14px;
+            flex:1; min-width:120px; padding:2px 0;
+          "
+          onkeydown="epTraitKeydown(event)"
+          onfocus="document.getElementById('ep-trait-chips').style.borderColor='var(--accent)'"
+          onblur="document.getElementById('ep-trait-chips').style.borderColor=''"
+        >
+      </div>
+
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Quick add:</div>
       <div class="quick-options" id="ep-personality-opts" style="gap:8px;margin-bottom:12px;">
-        <button class="qopt" onclick="epTogglePersonality(this)">Extrovert</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Introvert</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Analytical</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Intuitive</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Direct</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Diplomatic</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Big-picture</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Detail-focused</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Optimistic</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Cautious</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Competitive</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Collaborative</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Empathetic</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Reserved</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Humorous</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Serious</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Creative</button>
-        <button class="qopt" onclick="epTogglePersonality(this)">Structured</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Extrovert</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Introvert</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Analytical</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Intuitive</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Direct</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Diplomatic</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Big-picture</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Detail-focused</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Optimistic</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Cautious</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Competitive</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Collaborative</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Empathetic</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Reserved</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Humorous</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Serious</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Creative</button>
+        <button class="qopt" onclick="epAddPresetTrait(this)">Structured</button>
       </div>
       <label class="form-label">Communication Style</label>
       <input class="form-input" type="text" id="ep-comms" style="margin-bottom:10px;">
@@ -2194,11 +2216,9 @@ function openEditScreen() {
   sv('ep-passions', a.passions);
   sv('ep-teams',    a.teams);
 
-  // Personality chips
+  // Personality chips — use new tag-input system
   const traits = a.personality ? a.personality.split(',').map(s => s.trim()).filter(Boolean) : [];
-  document.querySelectorAll('#ep-personality-opts .qopt').forEach(b => {
-    b.classList.toggle('selected', traits.includes(b.textContent.trim()));
-  });
+  epSetTraits(traits);
   sv('ep-comms', a.comms);
 
   // Goals
@@ -2221,29 +2241,37 @@ function openEditScreen() {
 // Internal state — array of currently selected categories
 let epSelectedCats = [];
 
-// Render chips into the display area
+// Focus the inline input inside the chip container
+function epFocusInput() {
+  const input = document.getElementById('ep-cat-input');
+  if (input) input.focus();
+}
+
+// Render chips inside the container, keeping the inline input at the end
 function epRenderCats() {
   const container = document.getElementById('ep-cat-chips');
-  if (!container) return;
-  container.innerHTML = '';
+  const input = document.getElementById('ep-cat-input');
+  if (!container || !input) return;
 
-  if (epSelectedCats.length === 0) {
-    container.innerHTML = '<span style="color:var(--muted2);font-size:13px;font-style:italic;padding:2px 4px;">No categories selected — tap a preset or type one below</span>';
-  } else {
-    epSelectedCats.forEach((cat, i) => {
-      const chip = document.createElement('div');
-      chip.className = 'cat-chip';
-      chip.innerHTML = `
-        <span>${cat}</span>
-        <button class="cat-chip-remove" onclick="epRemoveCat(${i})" title="Remove">×</button>
-      `;
-      container.appendChild(chip);
-    });
-  }
+  // Remove all children except the input
+  Array.from(container.children).forEach(child => {
+    if (child !== input) child.remove();
+  });
 
-  // Dim preset buttons that are already selected
+  // Insert chips before the input
+  epSelectedCats.forEach((cat, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip';
+    chip.innerHTML = `<span>${cat}</span><button class="cat-chip-remove" onclick="epRemoveCat(${i})" title="Remove">×</button>`;
+    container.insertBefore(chip, input);
+  });
+
+  // Update placeholder visibility
+  input.placeholder = epSelectedCats.length === 0 ? 'Type and press Enter…' : 'Add more…';
+
+  // Dim preset buttons already selected
   document.querySelectorAll('#ep-cat-presets .qopt').forEach(b => {
-    b.classList.toggle('selected', epSelectedCats.includes(b.textContent.trim()));
+    b.classList.toggle('selected', epSelectedCats.map(c=>c.toLowerCase()).includes(b.textContent.trim().toLowerCase()));
   });
 }
 
@@ -2258,11 +2286,11 @@ function epAddCat(name) {
   const val = name.trim();
   if (!val) return;
   if (epSelectedCats.map(c => c.toLowerCase()).includes(val.toLowerCase())) {
-    // Shake the chip container briefly to show it's already there
+    // Flash border to show duplicate
     const container = document.getElementById('ep-cat-chips');
     if (container) {
-      container.style.borderColor = 'var(--accent)';
-      setTimeout(() => { container.style.borderColor = ''; }, 600);
+      container.style.borderColor = 'var(--accent2)';
+      setTimeout(() => { container.style.borderColor = 'var(--accent)'; }, 400);
     }
     return;
   }
@@ -2274,29 +2302,40 @@ function epAddCat(name) {
 function epRemoveCat(idx) {
   epSelectedCats.splice(idx, 1);
   epRenderCats();
+  epFocusInput();
 }
 
-// Tap a preset chip — toggle it
+// Tap a preset chip — toggle it on/off
 function epAddPresetCat(btn) {
   const name = btn.textContent.trim();
   if (epSelectedCats.map(c => c.toLowerCase()).includes(name.toLowerCase())) {
-    // Already selected — remove it
     epSelectedCats = epSelectedCats.filter(c => c.toLowerCase() !== name.toLowerCase());
   } else {
     epSelectedCats.push(name);
   }
   epRenderCats();
+  epFocusInput();
 }
 
-// Handle keyboard in the text input — Enter or comma adds the tag
+// Handle keyboard in the inline input
 function epCatKeydown(e) {
+  const input = e.target;
+
   if (e.key === 'Enter' || e.key === ',') {
     e.preventDefault();
-    epAddCatFromInput();
+    const val = input.value.trim().replace(/,$/, '');
+    if (val) {
+      epAddCat(val);
+      input.value = '';
+    }
+  } else if (e.key === 'Backspace' && input.value === '' && epSelectedCats.length > 0) {
+    // Delete last chip when input is empty and Backspace pressed
+    epSelectedCats.pop();
+    epRenderCats();
   }
 }
 
-// Read the input field and add as a chip
+// Read the input field and add as a chip (kept for any remaining + button references)
 function epAddCatFromInput() {
   const input = document.getElementById('ep-cat-input');
   if (!input) return;
@@ -2308,9 +2347,89 @@ function epAddCatFromInput() {
   }
 }
 
-// ─── Toggle personality in edit screen ───
+// ─── Toggle personality in edit screen (legacy — kept for safety) ───
 function epTogglePersonality(btn) {
   btn.classList.toggle('selected');
+}
+
+// ═══ PERSONALITY TRAIT TAG-INPUT ═══
+let epSelectedTraits = [];
+
+function epFocusTrait() {
+  const input = document.getElementById('ep-trait-input');
+  if (input) input.focus();
+}
+
+function epRenderTraits() {
+  const container = document.getElementById('ep-trait-chips');
+  const input = document.getElementById('ep-trait-input');
+  if (!container || !input) return;
+
+  Array.from(container.children).forEach(child => {
+    if (child !== input) child.remove();
+  });
+
+  epSelectedTraits.forEach((trait, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip';
+    chip.innerHTML = `<span>${trait}</span><button class="cat-chip-remove" onclick="epRemoveTrait(${i})" title="Remove">×</button>`;
+    container.insertBefore(chip, input);
+  });
+
+  input.placeholder = epSelectedTraits.length === 0 ? 'Type a trait and press Enter…' : 'Add more…';
+
+  document.querySelectorAll('#ep-personality-opts .qopt').forEach(b => {
+    b.classList.toggle('selected', epSelectedTraits.map(t=>t.toLowerCase()).includes(b.textContent.trim().toLowerCase()));
+  });
+}
+
+function epSetTraits(arr) {
+  epSelectedTraits = [...arr];
+  epRenderTraits();
+}
+
+function epAddTrait(name) {
+  const val = name.trim();
+  if (!val) return;
+  if (epSelectedTraits.map(t => t.toLowerCase()).includes(val.toLowerCase())) {
+    const container = document.getElementById('ep-trait-chips');
+    if (container) {
+      container.style.borderColor = 'var(--accent2)';
+      setTimeout(() => { container.style.borderColor = 'var(--accent)'; }, 400);
+    }
+    return;
+  }
+  epSelectedTraits.push(val);
+  epRenderTraits();
+}
+
+function epRemoveTrait(idx) {
+  epSelectedTraits.splice(idx, 1);
+  epRenderTraits();
+  epFocusTrait();
+}
+
+function epAddPresetTrait(btn) {
+  const name = btn.textContent.trim();
+  if (epSelectedTraits.map(t => t.toLowerCase()).includes(name.toLowerCase())) {
+    epSelectedTraits = epSelectedTraits.filter(t => t.toLowerCase() !== name.toLowerCase());
+  } else {
+    epSelectedTraits.push(name);
+  }
+  epRenderTraits();
+  epFocusTrait();
+}
+
+function epTraitKeydown(e) {
+  const input = e.target;
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = input.value.trim().replace(/,$/, '');
+    if (val) { epAddTrait(val); input.value = ''; }
+  } else if (e.key === 'Backspace' && input.value === '' && epSelectedTraits.length > 0) {
+    epSelectedTraits.pop();
+    epRenderTraits();
+  }
 }
 
 // ─── Cancel edit — go back to profile ───
@@ -2328,9 +2447,8 @@ async function saveProfileFromForm() {
   // Collect categories from tag-input state
   const cats = epSelectedCats.filter(Boolean);
 
-  // Collect personality traits — merge chips + any existing extras
-  const selectedTraits = [...document.querySelectorAll('#ep-personality-opts .qopt.selected')]
-    .map(b => b.textContent.trim()).filter(Boolean);
+  // Collect personality traits from tag-input state
+  const selectedTraits = epSelectedTraits.filter(Boolean);
 
   // Merge into currentPerson — preserve fields not shown in edit form
   currentPerson = {
