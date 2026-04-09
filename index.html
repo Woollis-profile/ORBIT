@@ -1659,12 +1659,39 @@ async function syncToNotion(person) {
     let result;
 
     if (person.notionPageId) {
-      // Update title property
+      // ── UPDATE EXISTING PAGE ──
+
+      // 1. Update the page title property
       result = await notionDirect(`pages/${person.notionPageId}`, 'PATCH', { properties: props });
-      // Replace body blocks by appending updated content
-      // (Notion doesn't support bulk block replace via API without deleting first)
+
+      // 2. Fetch existing block IDs so we can delete them
+      let existingBlocks = [];
+      try {
+        const blocksRes = await notionDirect(`blocks/${person.notionPageId}/children`, 'GET');
+        existingBlocks = (blocksRes.results || []).map(b => b.id);
+      } catch(e) {
+        console.warn('Could not fetch existing blocks:', e.message);
+      }
+
+      // 3. Delete each existing block individually
+      for (const blockId of existingBlocks) {
+        try {
+          await notionDirect(`blocks/${blockId}`, 'DELETE');
+        } catch(e) {
+          console.warn('Could not delete block:', blockId, e.message);
+        }
+      }
+
+      // 4. Append fresh body blocks with all updated profile data
+      // Notion limits to 100 blocks per request — chunk if needed
+      const chunkSize = 100;
+      for (let i = 0; i < children.length; i += chunkSize) {
+        const chunk = children.slice(i, i + chunkSize);
+        await notionDirect(`blocks/${person.notionPageId}/children`, 'PATCH', { children: chunk });
+      }
+
     } else {
-      // Create new page with body content
+      // ── CREATE NEW PAGE ──
       result = await notionDirect('pages', 'POST', {
         parent: { database_id: notionDB },
         properties: props,
@@ -1673,8 +1700,9 @@ async function syncToNotion(person) {
       if (result.id) person.notionPageId = result.id;
     }
 
-    person.synced = result && result.id ? true : false;
-    return person.synced;
+    person.synced = true;
+    return true;
+
   } catch(e) {
     console.error('Notion sync error:', e.message);
     person.synced = false;
@@ -2526,7 +2554,7 @@ async function saveProfileFromForm() {
     }
   };
 
-  // Save locally first — instant
+  // Save locally first — instant, so data is never lost
   const idx = people.findIndex(p => p.id === currentPerson.id);
   if (idx >= 0) people[idx] = currentPerson;
   else people.unshift(currentPerson);
@@ -2535,20 +2563,35 @@ async function saveProfileFromForm() {
   // Sync to Notion
   try {
     const ok = await syncToNotion(currentPerson);
-    currentPerson.synced = ok;
+
+    // Keep people array in sync after Notion assigns/updates notionPageId
+    const idx2 = people.findIndex(p => p.id === currentPerson.id);
+    if (idx2 >= 0) people[idx2] = currentPerson;
     localStorage.setItem('orbit-people', JSON.stringify(people));
 
-    if (btn) { btn.textContent = ok ? '✅ Saved!' : '⚠️ Saved locally'; btn.disabled = false; }
-    showToast(ok ? '✅ Profile saved to Notion' : '⚠️ Saved locally — Notion sync failed');
+    if (btn) {
+      btn.textContent = ok ? '✅ Saved to Notion!' : '⚠️ Saved locally only';
+      btn.style.background = ok ? 'var(--success)' : '';
+      btn.disabled = false;
+    }
+    showToast(ok ? '✅ Profile saved to Notion' : '⚠️ Saved locally — Notion unreachable');
 
     // Return to profile after short delay so user sees confirmation
     setTimeout(() => {
       loadProfile(currentPerson);
       show('profile');
-    }, 900);
+      if (btn) {
+        btn.textContent = 'Save ✓';
+        btn.style.background = '';
+      }
+    }, 1200);
+
   } catch (e) {
-    if (btn) { btn.textContent = 'Save ✓'; btn.disabled = false; }
-    showToast('⚠️ Save failed — ' + e.message);
+    // Data is already saved locally — just inform user Notion failed
+    if (btn) { btn.textContent = 'Save ✓'; btn.disabled = false; btn.style.background = ''; }
+    showToast('⚠️ Notion error: ' + e.message);
+    // Still navigate back — data is safe locally
+    setTimeout(() => { loadProfile(currentPerson); show('profile'); }, 1500);
   }
 }
 
